@@ -26,7 +26,6 @@ import androidx.work.workDataOf
 import com.example.weathertriggerapp2.R
 import com.example.weathertriggerapp2.data.WeatherResponse
 import com.example.weathertriggerapp2.network.WeatherApi
-import com.example.weathertriggerapp2.worker.WeatherNotificationWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,7 +46,7 @@ class WeatherViewModel : ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
                 Log.d(TAG, "Inside coroutine block...")
                 try {
-                    // Execute the network request asynchronously
+                    // Execute the network request
                     Log.d(TAG, "Making network request...")
                     val response: Response<WeatherResponse> = WeatherApi.retrofitService.getWeather().execute()
 

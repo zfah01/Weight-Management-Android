@@ -49,18 +49,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleNotificationWorker() {
-//        val workRequestWeather = PeriodicWorkRequest.Builder(
-//            WeatherNotificationWorker::class.java,
-//            15,
-//            TimeUnit.MINUTES
-//        ).build()
-//
-//        val workRequestLocation = PeriodicWorkRequest.Builder(
-//            LocationNotificationWorker::class.java,
-//            15,
-//            TimeUnit.MINUTES
-//        ).build()
-
         val constraints = Constraints.Builder() // only run if battery isn't low - location/gps tends to kill battery
             .setRequiresBatteryNotLow(true)
             .build()
