@@ -11,13 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.Constraints
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
-import com.example.weathertriggerapp2.viewModel.MainScreen
-import com.example.weathertriggerapp2.viewModel.WeatherViewModel
 import com.example.weathertriggerapp2.worker.WeatherAndLocationNotificationWorker
 import java.util.concurrent.TimeUnit
 
@@ -40,8 +37,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-//                        val weatherViewModel: WeatherViewModel = viewModel()
-//                        MainScreen(weatherUiState = weatherViewModel.weatherUiState)
+                        // UI code here
                     }
                 }
             }
@@ -53,7 +49,7 @@ class MainActivity : ComponentActivity() {
             .setRequiresBatteryNotLow(true)
             .build()
 
-        // Will Change to AlarmManager to get sending every day at 9am
+        // Change to run at 9am everyday, not every 15 mins
         val workRequestLocationAndWeather = PeriodicWorkRequest.Builder(
             WeatherAndLocationNotificationWorker::class.java,
             15,
@@ -72,12 +68,13 @@ class MainActivity : ComponentActivity() {
                 locationPermissionDeniedAlert()
             }
             else {
-                // Schedule workers
+                // Schedule worker
                 scheduleNotificationWorker()
             }
         }
     }
 
+    // Dialog alert if permissions are denied
     private fun locationPermissionDeniedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Location Permission Has Been Denied")

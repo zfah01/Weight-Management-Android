@@ -12,10 +12,6 @@ import retrofit2.http.Query
 private const val BASE_URL = "https://api.openweathermap.org/"
 
 interface OpenWeatherApiService {
-    // fixed lat and lon values - practise implementation
-    @GET("data/2.5/weather?lat=55.86&lon=-4.25&appid=ed339cdb731796705ce70f8b33f20291")
-    fun getWeather() : Call<WeatherResponse>
-
     // takes in current location of user
     @GET("data/2.5/weather")
     fun getWeatherLocation(
