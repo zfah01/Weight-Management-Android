@@ -79,22 +79,10 @@ class WeatherAndLocationNotificationWorker(ctx: Context, params: WorkerParameter
                     val long = location.longitude
                     val appid = "ed339cdb731796705ce70f8b33f20291"
 
-                    var weatherResponse by mutableStateOf<WeatherResponse?>(null)
-                    val response: Response<WeatherResponse> =
-                        WeatherApi.retrofitService.getWeatherLocation(lat, long, appid).execute()
-                    if (response.isSuccessful) {
-                        weatherResponse = response.body()
-                    } else {
-                        // Get most recent cached response? Right now just doesn't run if it fails
-                        weatherResponse = null
-                        Log.e("TAG", "Error Getting Response")
-                    }
-
-                    if (weatherResponse != null) {
-                        val main = weatherResponse!!.weather.firstOrNull()?.main
-                        if (main != null) {
-                            createNotification(main)
-                        }
+                    val response = WeatherApi.weatherRepository.getWeatherLocation(appid, lat, long)
+                    val main = response.weather.firstOrNull()?.main
+                    if(main != null) {
+                        createNotification(main)
                     }
                 }
                 Result.success()

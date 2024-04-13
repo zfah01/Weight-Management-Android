@@ -1,6 +1,10 @@
 package com.example.weathertriggerapp2.network
 
 import com.example.weathertriggerapp2.data.NutritionResponse
+import com.example.weathertriggerapp2.repository.NetworkNutritionRepository
+import com.example.weathertriggerapp2.repository.NetworkWeatherRepository
+import com.example.weathertriggerapp2.repository.NutritionRepository
+import com.example.weathertriggerapp2.repository.WeatherRepository
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,5 +31,9 @@ object NutritionApi {
 
     val retrofitService : NutritionApiService by lazy {
         retrofit.create(NutritionApiService::class.java)
+    }
+
+    val nutritionRepository: NutritionRepository by lazy {
+        NetworkNutritionRepository(NutritionApi.retrofitService)
     }
 }

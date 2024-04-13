@@ -1,5 +1,7 @@
 package com.example.weathertriggerapp2.network
 import com.example.weathertriggerapp2.data.WeatherResponse
+import com.example.weathertriggerapp2.repository.NetworkWeatherRepository
+import com.example.weathertriggerapp2.repository.WeatherRepository
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
@@ -24,8 +26,14 @@ object WeatherApi {
         .baseUrl(BASE_URL)
         .build()
 
-    val retrofitService : OpenWeatherApiService by lazy {
+    private val retrofitService: OpenWeatherApiService by lazy {
         retrofit.create(OpenWeatherApiService::class.java)
     }
+
+    val weatherRepository: WeatherRepository by lazy {
+        NetworkWeatherRepository(retrofitService)
+    }
 }
+
+
 
