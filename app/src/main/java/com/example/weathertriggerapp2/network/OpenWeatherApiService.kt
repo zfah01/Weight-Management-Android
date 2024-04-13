@@ -1,8 +1,5 @@
 package com.example.weathertriggerapp2.network
-import android.content.Context
 import com.example.weathertriggerapp2.data.WeatherResponse
-import okhttp3.Cache
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
@@ -10,7 +7,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Query
 
 private const val BASE_URL = "https://api.openweathermap.org/"
-
 interface OpenWeatherApiService {
     // takes in current location of user
     @GET("data/2.5/weather")

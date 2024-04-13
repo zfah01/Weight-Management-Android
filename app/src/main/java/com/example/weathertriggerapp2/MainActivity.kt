@@ -15,6 +15,7 @@ import androidx.work.Constraints
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
+import com.example.weathertriggerapp2.viewModel.MainScreen
 import com.example.weathertriggerapp2.worker.WeatherAndLocationNotificationWorker
 import java.util.concurrent.TimeUnit
 
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        // UI code here
+                        MainScreen()
                     }
                 }
             }
