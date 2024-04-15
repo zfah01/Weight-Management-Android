@@ -26,7 +26,7 @@ class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewM
     var foodUiState by mutableStateOf<List<NutritionResponse>?>(null)
         private set
 
-    fun setCalorieCount(newValue: String) {
+    fun setCalorieCount(newValue: Double) {
         CalorieCountRepository.calorieCount = newValue
         Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
     }
@@ -43,7 +43,7 @@ class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewM
                     totalCalories += (response[j].calories)
                 }
                 Log.i(TAG, "RESULT: $totalCalories")
-                setCalorieCount(totalCalories.toString())
+                setCalorieCount(totalCalories)
 
 
                 // MOVE TO WORKER CLASS AND INSERT AT SPECIFIC TIME

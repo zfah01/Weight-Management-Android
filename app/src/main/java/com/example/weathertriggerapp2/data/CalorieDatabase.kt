@@ -8,7 +8,6 @@ import androidx.room.Room
 @Database(entities = [Calorie::class], version = 1)
 abstract class CalorieDatabase  : RoomDatabase() {
     abstract fun calorieDao(): CalorieDao
-
     companion object {
         @Volatile
         private var INSTANCE: CalorieDatabase? = null

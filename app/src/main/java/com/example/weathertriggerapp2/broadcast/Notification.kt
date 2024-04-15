@@ -25,11 +25,11 @@ import java.util.Locale
 // BroadcastReceiver for handling notifications
 class Notification : BroadcastReceiver() {
 
-    // Method called when the broadcast is received
+    // Method called when the broadcast is received based on intent action
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(appContext: Context, intent: Intent) {
         val calorieCount = CalorieCountRepository.calorieCount
-        Log.i("TAG", "calorieCount: $calorieCount")
+//        Log.i("TAG", "calorieCount: $calorieCount")
         when (intent.action) {
             ACTION_ALARM_1 -> {
                 fun createNotification() {
@@ -51,7 +51,7 @@ class Notification : BroadcastReceiver() {
                     // Create notification
                     val notification = NotificationCompat.Builder(
                         appContext,
-                        "weather_location_channel"
+                        "calorie_midday_channel"
                     )
                         .setContentTitle("Midday Calorie Check In")
                         .setContentText("So far, you have consumed $calorieCount calories! Keep it up!")
@@ -64,8 +64,8 @@ class Notification : BroadcastReceiver() {
                 createNotification()
             }
             ACTION_ALARM_2 -> {
-                fun getNotificationMessage(caloriesAmount: String): String {
-                    return if(caloriesAmount.toInt() >= 2000) {
+                fun getNotificationMessage(caloriesAmount: Double): String {
+                    return if(caloriesAmount >= 2000.0) {
                         "You have consumed $calorieCount calories today and met your daily calorie target! Well done!"
                     } else {
                         "You have consumed $calorieCount calories today! \n" +
@@ -91,7 +91,7 @@ class Notification : BroadcastReceiver() {
                     // Create notification
                     val notification = NotificationCompat.Builder(
                         appContext,
-                        "weather_location_channel"
+                        "calorie_eod_channel"
                     )
                         .setContentTitle("End of Day Calorie Check In")
                         .setContentText(calorieCount?.let { getNotificationMessage(it) })
@@ -177,10 +177,15 @@ class Notification : BroadcastReceiver() {
                 }
             }
             ACTION_ALARM_4 -> {
-                val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
-                val newCalorie = Calorie(0, calorieCount, 0.0, "")
-                GlobalScope.launch(Dispatchers.IO) {
-                    calorieRepository.insert(newCalorie)
+                try {
+                    val calorieRepository =
+                        CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
+                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "")
+                    GlobalScope.launch(Dispatchers.IO) {
+                        calorieRepository.insert(newCalorie)
+                    }
+                } catch (e: Exception) {
+                    Log.e("TAG", "${e.message}")
                 }
             }
         }

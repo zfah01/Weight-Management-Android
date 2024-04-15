@@ -14,6 +14,4 @@ data class Calorie(
     val stepCount: Double,
     @ColumnInfo(name = "most_common_food_type")
     val mostCommonFoodType: String,
-//    @ColumnInfo(name = "date")
-//    val date: Date
 )

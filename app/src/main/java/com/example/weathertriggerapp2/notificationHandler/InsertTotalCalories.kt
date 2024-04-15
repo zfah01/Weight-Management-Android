@@ -18,7 +18,6 @@ class InsertTotalCalories(val context: Context) {
             action = Notification.ACTION_ALARM_4
         }
 
-        // Create a PendingIntent for the broadcast
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             4,
@@ -29,7 +28,8 @@ class InsertTotalCalories(val context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, 5) // Schedule notification 1 minute from now
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 0)
 
         val time = calendar.timeInMillis
 

@@ -20,7 +20,6 @@ class WeatherNotification(val context: Context) {
             action = Notification.ACTION_ALARM_3
         }
 
-        // Create a PendingIntent for the broadcast
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             3,
@@ -30,12 +29,11 @@ class WeatherNotification(val context: Context) {
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // Get the selected time and schedule the notification
-        val calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/London"));
-        calendar.add(Calendar.MINUTE, 3) // Schedule notification 1 minute from now
+        val calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 9)
+        calendar.set(Calendar.MINUTE, 0)
 
         val time = calendar.timeInMillis
-
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,

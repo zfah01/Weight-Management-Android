@@ -123,23 +123,6 @@ fun InputScreen(
                 color = MaterialTheme.colorScheme.error
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if(calorieUiState != null) {
-            GetJsonInfo(calorie = calorieUiState)
-        } else {
-            Text("No nutrition information available")
-        }
-    }
-}
-
-@Composable
-fun GetJsonInfo(calorie: List<NutritionResponse>?) {
-    val gson = Gson()
-    val jsonString = calorie?.let { gson.toJson(it) }
-    if (jsonString != null) {
-        Text(text = jsonString)
     }
 }
 

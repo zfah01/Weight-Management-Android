@@ -18,7 +18,6 @@ class CalorieMidDayNotification(val context: Context) {
             action = Notification.ACTION_ALARM_1
         }
 
-        // Create a PendingIntent for the broadcast
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             1,
@@ -29,7 +28,8 @@ class CalorieMidDayNotification(val context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, 1) // Schedule notification 1 minute from now
+        calendar.set(Calendar.HOUR_OF_DAY, 14)
+        calendar.set(Calendar.MINUTE, 0)
 
         val time = calendar.timeInMillis
 

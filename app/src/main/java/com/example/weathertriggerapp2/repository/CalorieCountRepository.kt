@@ -1,5 +1,5 @@
 package com.example.weathertriggerapp2.repository
 
 object CalorieCountRepository {
-    var calorieCount: String? = "0"
+    var calorieCount: Double? = 0.0
 }
