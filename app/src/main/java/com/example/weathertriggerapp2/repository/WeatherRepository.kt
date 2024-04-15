@@ -15,5 +15,4 @@ class NetworkWeatherRepository(private val apiService: OpenWeatherApiService) : 
     ): WeatherResponse {
         return apiService.getWeatherLocation(lat, lon, appId).execute().body()!!
     }
-
 }

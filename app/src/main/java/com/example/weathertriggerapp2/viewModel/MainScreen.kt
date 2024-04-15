@@ -112,7 +112,7 @@ fun InputScreen(
                 }
             }
         ) {
-            Text("Search")
+            Text("Add")
         }
 
         Spacer(modifier = Modifier.height(16.dp))

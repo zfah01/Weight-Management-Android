@@ -12,15 +12,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.work.Constraints
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
 import com.example.weathertriggerapp2.viewModel.MainScreen
-import com.example.weathertriggerapp2.worker.WeatherAndLocationNotificationWorker
-import java.util.concurrent.TimeUnit
+//import com.example.weathertriggerapp2.worker.WeatherAndLocationNotificationWorker
 
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.example.weathertriggerapp2.notificationHandler.CalorieEndOfDayNotification
+import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotification
+import com.example.weathertriggerapp2.notificationHandler.InsertTotalCalories
+//import androidx.appcompat.app.AppCompatActivity
+import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
+
+// https://www.geeksforgeeks.org/schedule-notifications-in-android/
+// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -32,6 +40,13 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ), 0
         )
+
+        val alarmSchedulerCalorieMidday = CalorieMidDayNotification(applicationContext)
+        val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
+        val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
+        alarmSchedulerCalorieMidday.scheduleMiddayNotification()
+        alarmSchedulerCalorieEod.scheduleEodNotification()
+        alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
 
             setContent {
                 WeatherTriggerApp2Theme {
@@ -46,22 +61,8 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun scheduleNotificationWorker() {
-        val constraints = Constraints.Builder() // only run if battery isn't low - location/gps tends to kill battery
-            .setRequiresBatteryNotLow(true)
-            .build()
-
-        // Change to run at 9am everyday, not every 15 mins
-        val workRequestLocationAndWeather = PeriodicWorkRequest.Builder(
-            WeatherAndLocationNotificationWorker::class.java,
-            15,
-            TimeUnit.MINUTES
-        ).setConstraints(constraints).build()
-
-        WorkManager.getInstance(applicationContext).enqueue(workRequestLocationAndWeather)
-    }
-
     // Checks if permissions are granted. If so, schedule notification worker
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // location permission
@@ -70,9 +71,11 @@ class MainActivity : ComponentActivity() {
                 locationPermissionDeniedAlert()
             }
             else {
-                // Schedule worker
-                Log.i("TAG", "scheduling worker")
-                scheduleNotificationWorker()
+                // Schedule alarm
+                Log.i("TAG", "scheduling location notification")
+
+                val alarmSchedulerWeather = WeatherNotification(applicationContext)
+                alarmSchedulerWeather.scheduleWeatherNotification()
             }
         }
     }

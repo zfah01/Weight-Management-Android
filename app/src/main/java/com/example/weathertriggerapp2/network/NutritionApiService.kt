@@ -34,6 +34,6 @@ object NutritionApi {
     }
 
     val nutritionRepository: NutritionRepository by lazy {
-        NetworkNutritionRepository(NutritionApi.retrofitService)
+        NetworkNutritionRepository(retrofitService)
     }
 }

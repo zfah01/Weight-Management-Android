@@ -21,4 +21,7 @@ interface CalorieDao {
 
     @Query("SELECT * FROM calories")
     fun getAll(): Flow<List<Calorie>>
+
+//    fun updateData(newValue: String)
+//    fun getData(): String
 }

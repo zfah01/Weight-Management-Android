@@ -10,5 +10,4 @@ open class CalorieRepository(private val calorieDao: CalorieDao) {
     open suspend fun insert(calorie: Calorie) {
         calorieDao.insert(calorie)
     }
-
 }
