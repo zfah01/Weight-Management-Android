@@ -15,11 +15,13 @@ import com.example.weathertriggerapp2.locationHandler.DefaultLocationClient
 import com.example.weathertriggerapp2.network.WeatherApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import com.example.weathertriggerapp2.repository.CalorieRepository
+import com.example.weathertriggerapp2.repository.WeeklyFeedbackRepository
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Locale
 
 // BroadcastReceiver for handling notifications
@@ -63,15 +65,17 @@ class Notification : BroadcastReceiver() {
                 }
                 createNotification()
             }
+
             ACTION_ALARM_2 -> {
                 fun getNotificationMessage(caloriesAmount: Double): String {
-                    return if(caloriesAmount >= 2000.0) {
+                    return if (caloriesAmount >= 2000.0) {
                         "You have consumed $calorieCount calories today and met your daily calorie target! Well done!"
                     } else {
                         "You have consumed $calorieCount calories today! \n" +
                                 "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
                     }
                 }
+
                 fun createNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION EOD CALORIE")
                     val notificationManager =
@@ -103,6 +107,7 @@ class Notification : BroadcastReceiver() {
                 }
                 createNotification()
             }
+
             ACTION_ALARM_3 -> {
                 fun getNotificationMessage(weather: String): String {
                     return when (weather.lowercase(Locale.getDefault())) {
@@ -176,11 +181,12 @@ class Notification : BroadcastReceiver() {
                     Log.e("TAG", "${e.message}")
                 }
             }
+
             ACTION_ALARM_4 -> {
                 try {
                     val calorieRepository =
                         CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
-                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "")
+                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "", 0)
                     GlobalScope.launch(Dispatchers.IO) {
                         calorieRepository.insert(newCalorie)
                     }
@@ -188,7 +194,109 @@ class Notification : BroadcastReceiver() {
                     Log.e("TAG", "${e.message}")
                 }
             }
+
+            ACTION_ALARM_5 -> {
+                val repository = WeeklyFeedbackRepository.getInstance(appContext)
+                val currentWeekNumber = getCurrWeek()
+
+                val calorieCount = repository.getWeeklyCalorieCount(currentWeekNumber)
+
+                fun getNotificationMessage(caloriesAmount: Double): String {
+                    return if (caloriesAmount in 12000.0..17500.0) {
+                        "Well Done! You have consumed a healthy amount of calories this week."
+                    } else {
+                        "You haven't met your daily caloric intake this week! \n" +
+                                "Remember a healthy daily caloric is between 2000-2500 calories if you are aiming for weight loss. \n" +
+                         "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
+                    }
+                }
+
+                fun createNotification() {
+                    Log.i("TAG", "CREATE NOTIFICATION WEEKLY CALORIES FEEDBACK")
+                    val notificationManager =
+                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    // Create Notification Channel
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val channel = NotificationChannel(
+                            "weekly_calories_feedback_channel",
+                            "Weekly Calories Feedback",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                        ).apply {
+                            description = "Weekly Feedback Update Channel"
+                        }
+                        notificationManager.createNotificationChannel(channel)
+                    }
+
+                    // Create notification
+                    val notification = NotificationCompat.Builder(
+                        appContext,
+                        "weekly_feedback_channel"
+                    )
+                        .setContentTitle("Weekly Calories Check")
+                        .setContentText(
+                            calorieCount?.let { getNotificationMessage(it) }
+                        )
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true)
+
+                    notificationManager.notify(4, notification.build())
+                }
+                createNotification()
+            }
+            ACTION_ALARM_6 -> {
+                val repository = WeeklyFeedbackRepository.getInstance(appContext)
+                val currentWeekNumber = getCurrWeek()
+                val stepsCount = repository.getWeeklyStepsCount(currentWeekNumber)
+
+                fun getNotificationMessage(stepsAmount: Double): String {
+                    return if (stepsAmount >= 70000.0) {
+                        "Congratulations! You have hit your weekly goal of 10,000 or more steps a day."
+                    } else {
+                        "You have not been able to hit your target goal this week! \n" +
+                                "Unfortunately, you have not been successful in achieving 10,000 or more steps a day this week. "
+                    }
+                }
+
+                fun createNotification() {
+                    Log.i("TAG", "CREATE NOTIFICATION WEEKLY STEPS FEEDBACK")
+                    val notificationManager =
+                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    // Create Notification Channel
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val channel = NotificationChannel(
+                            "weekly_steps_feedback_channel",
+                            "Weekly Steps Feedback",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                        ).apply {
+                            description = "Weekly Steps Feedback Update Channel"
+                        }
+                        notificationManager.createNotificationChannel(channel)
+                    }
+
+                    // Create notification
+                    val notification = NotificationCompat.Builder(
+                        appContext,
+                        "weekly_steps_feedback_channel"
+                    )
+                        .setContentTitle("Weekly Steps Check")
+                        .setContentText(
+                            stepsCount?.let { getNotificationMessage(it) }
+                        )
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true)
+
+                    notificationManager.notify(5, notification.build())
+                }
+                createNotification()
+            }
         }
+    }
+    private fun getCurrWeek(): Int {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        return calendar.get(Calendar.WEEK_OF_YEAR)
     }
 
     // Calories (Mid and EOD), Weather, Insertion
@@ -197,5 +305,7 @@ class Notification : BroadcastReceiver() {
         const val ACTION_ALARM_2 = "Calories EOD"
         const val ACTION_ALARM_3 = "Weather"
         const val ACTION_ALARM_4 = "Insert Calories"
+        const val ACTION_ALARM_5 = "Weekly Calories Notification"
+        const val ACTION_ALARM_6 = "Weekly Steps Notification"
     }
 }

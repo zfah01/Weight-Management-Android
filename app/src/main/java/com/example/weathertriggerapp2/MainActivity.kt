@@ -24,6 +24,8 @@ import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotificat
 import com.example.weathertriggerapp2.notificationHandler.InsertTotalCalories
 //import androidx.appcompat.app.AppCompatActivity
 import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
+import com.example.weathertriggerapp2.notificationHandler.WeeklyCaloriesFeedbackNotification
+import com.example.weathertriggerapp2.notificationHandler.WeeklyStepsFeedbackNotification
 
 // https://www.geeksforgeeks.org/schedule-notifications-in-android/
 // https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
@@ -44,9 +46,13 @@ class MainActivity : ComponentActivity() {
         val alarmSchedulerCalorieMidday = CalorieMidDayNotification(applicationContext)
         val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
         val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
+        val alarmSchedulerWeeklyCaloriesFeedback = WeeklyCaloriesFeedbackNotification(applicationContext)
+        val alarmSchedulerWeeklyStepsFeedback = WeeklyStepsFeedbackNotification(applicationContext)
         alarmSchedulerCalorieMidday.scheduleMiddayNotification()
         alarmSchedulerCalorieEod.scheduleEodNotification()
         alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
+        alarmSchedulerWeeklyCaloriesFeedback.scheduleWeeklyCaloriesNotification()
+        alarmSchedulerWeeklyStepsFeedback.scheduleWeeklyStepsNotification()
 
             setContent {
                 WeatherTriggerApp2Theme {

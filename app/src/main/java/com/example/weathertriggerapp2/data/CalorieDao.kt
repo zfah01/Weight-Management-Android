@@ -24,4 +24,10 @@ interface CalorieDao {
 
 //    fun updateData(newValue: String)
 //    fun getData(): String
+
+    @Query("SELECT SUM(step_count) FROM calories WHERE number_of_week = :weekNum")
+    fun getStepsCountWeekly(weekNum: Int): Double
+
+    @Query("SELECT SUM(calorie_count) FROM calories WHERE number_of_week = :weekNum")
+    fun getCaloriesCountWeekly(weekNum: Int): Double
 }
