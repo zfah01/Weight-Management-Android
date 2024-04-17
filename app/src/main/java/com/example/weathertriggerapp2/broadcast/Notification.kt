@@ -197,9 +197,9 @@ class Notification : BroadcastReceiver() {
 
             ACTION_ALARM_5 -> {
                 val repository = WeeklyFeedbackRepository.getInstance(appContext)
-                val currentWeekNumber = getCurrWeek()
+                val currNumWeek = getCurrWeek()
 
-                val calorieCount = repository.getWeeklyCalorieCount(currentWeekNumber)
+                val calorieCount = repository.getWeeklyCalorieCount(currNumWeek)
 
                 fun getNotificationMessage(caloriesAmount: Double): String {
                     return if (caloriesAmount in 12000.0..17500.0) {
@@ -230,7 +230,7 @@ class Notification : BroadcastReceiver() {
                     // Create notification
                     val notification = NotificationCompat.Builder(
                         appContext,
-                        "weekly_feedback_channel"
+                        "weekly_calories_feedback_channel"
                     )
                         .setContentTitle("Weekly Calories Check")
                         .setContentText(
@@ -246,8 +246,8 @@ class Notification : BroadcastReceiver() {
             }
             ACTION_ALARM_6 -> {
                 val repository = WeeklyFeedbackRepository.getInstance(appContext)
-                val currentWeekNumber = getCurrWeek()
-                val stepsCount = repository.getWeeklyStepsCount(currentWeekNumber)
+                val currNumWeek = getCurrWeek()
+                val stepsCount = repository.getWeeklyStepsCount(currNumWeek)
 
                 fun getNotificationMessage(stepsAmount: Double): String {
                     return if (stepsAmount >= 70000.0) {
