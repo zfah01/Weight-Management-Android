@@ -4,6 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Data class for representing calories database table
+ * */
 @Entity(tableName = "calories")
 data class Calorie(
     @PrimaryKey(autoGenerate = true)

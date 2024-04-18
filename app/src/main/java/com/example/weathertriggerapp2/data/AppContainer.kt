@@ -5,7 +5,7 @@ import com.example.weathertriggerapp2.repository.CalorieRepository
 import com.example.weathertriggerapp2.repository.OfflineCaloriesRepository
 
 /**
- * App container for Dependency injection.
+ * App container class for Dependency injection
  */
 interface AppContainer {
     val calorieRepository : CalorieRepository

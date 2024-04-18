@@ -10,6 +10,11 @@ import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
 import java.util.Calendar
 
+// https://www.geeksforgeeks.org/schedule-notifications-in-android/
+// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
+/**
+ * Class for scheduling calorie insertion into 'calories'
+ * */
 class InsertTotalCalories(val context: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
@@ -29,7 +34,7 @@ class InsertTotalCalories(val context: Context) {
 
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.MINUTE, 59)
 
         val time = calendar.timeInMillis
 

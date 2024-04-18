@@ -1,20 +1,17 @@
 package com.example.weathertriggerapp2.network
 
 import com.example.weathertriggerapp2.data.NutritionResponse
-import com.example.weathertriggerapp2.repository.NetworkNutritionRepository
-import com.example.weathertriggerapp2.repository.NetworkWeatherRepository
-import com.example.weathertriggerapp2.repository.NutritionRepository
-import com.example.weathertriggerapp2.repository.WeatherRepository
 import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Query
+import retrofit2.http.Headers
+import retrofit2.http.Query 
 
-// https://api-ninjas.com/api/nutrition
-private const val BASE_URL = "https://api.api-ninjas.com/v1/"
+/**
+ * Interface representing Nutrition API http calls
+ * */
 interface NutritionApiService {
+    @Headers("Cache-Control: max-age=86400")
     @GET("nutrition")
     fun getNutritionInfo(
         @Header("x-api-key") apiKey: String,
@@ -22,18 +19,3 @@ interface NutritionApiService {
     ): Call<List<NutritionResponse>>
 }
 
-// Still to implement caching? Maybe?
-object NutritionApi {
-    private val retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl(BASE_URL)
-        .build()
-
-    private val retrofitService : NutritionApiService by lazy {
-        retrofit.create(NutritionApiService::class.java)
-    }
-
-    val nutritionRepository: NutritionRepository by lazy {
-        NetworkNutritionRepository(retrofitService)
-    }
-}

@@ -12,16 +12,8 @@ import kotlinx.coroutines.flow.Flow
 interface CalorieDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(calorie: Calorie)
-
     @Delete
     fun delete(calorie: Calorie)
-
-//    @Query("SELECT * from calories WHERE id = id")
-//    fun getCalorie(id: Int): Flow<Calorie>
-
     @Query("SELECT * FROM calories")
     fun getAll(): Flow<List<Calorie>>
-
-//    fun updateData(newValue: String)
-//    fun getData(): String
 }

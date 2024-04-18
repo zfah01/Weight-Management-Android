@@ -10,6 +10,12 @@ import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
 import java.util.Calendar
 
+// https://www.geeksforgeeks.org/schedule-notifications-in-android/
+// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
+
+/**
+ * Class for scheduling EOD calorie intake notification
+ * */
 class CalorieEndOfDayNotification(val context: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")

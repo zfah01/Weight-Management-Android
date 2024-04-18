@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
 import com.example.weathertriggerapp2.viewModel.MainScreen
-//import com.example.weathertriggerapp2.worker.WeatherAndLocationNotificationWorker
 
 
 import android.os.Build
@@ -22,11 +21,8 @@ import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.notificationHandler.CalorieEndOfDayNotification
 import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotification
 import com.example.weathertriggerapp2.notificationHandler.InsertTotalCalories
-//import androidx.appcompat.app.AppCompatActivity
 import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
 
-// https://www.geeksforgeeks.org/schedule-notifications-in-android/
-// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {

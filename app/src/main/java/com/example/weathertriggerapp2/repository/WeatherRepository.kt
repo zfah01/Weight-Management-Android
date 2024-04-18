@@ -3,6 +3,9 @@ package com.example.weathertriggerapp2.repository
 import com.example.weathertriggerapp2.data.WeatherResponse
 import com.example.weathertriggerapp2.network.OpenWeatherApiService
 
+/**
+ * Interface representing Weather Repository
+ * */
 interface WeatherRepository {
     suspend fun getWeatherLocation(appId: String, lat: Double, lon: Double): WeatherResponse
 }

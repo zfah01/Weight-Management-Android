@@ -22,20 +22,19 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-// BroadcastReceiver for handling notifications
+/**
+ * Broadcast Receiver class for handling notifications
+ * */
 class Notification : BroadcastReceiver() {
-
-    // Method called when the broadcast is received based on intent action
     @OptIn(DelicateCoroutinesApi::class)
-    override fun onReceive(appContext: Context, intent: Intent) {
+    override fun onReceive(context: Context, intent: Intent) {
         val calorieCount = CalorieCountRepository.calorieCount
-//        Log.i("TAG", "calorieCount: $calorieCount")
         when (intent.action) {
             ACTION_ALARM_1 -> {
                 fun createNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION MIDDAY CALORIE")
                     val notificationManager =
-                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     // Create Notification Channel
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         val channel = NotificationChannel(
@@ -50,7 +49,7 @@ class Notification : BroadcastReceiver() {
 
                     // Create notification
                     val notification = NotificationCompat.Builder(
-                        appContext,
+                        context,
                         "calorie_midday_channel"
                     )
                         .setContentTitle("Midday Calorie Check In")
@@ -75,7 +74,7 @@ class Notification : BroadcastReceiver() {
                 fun createNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION EOD CALORIE")
                     val notificationManager =
-                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     // Create Notification Channel
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         val channel = NotificationChannel(
@@ -90,7 +89,7 @@ class Notification : BroadcastReceiver() {
 
                     // Create notification
                     val notification = NotificationCompat.Builder(
-                        appContext,
+                        context,
                         "calorie_eod_channel"
                     )
                         .setContentTitle("End of Day Calorie Check In")
@@ -119,7 +118,7 @@ class Notification : BroadcastReceiver() {
                 fun createNotification(weather: String) {
                     Log.i("TAG", "CREATE NOTIFICATION")
                     val notificationManager =
-                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     // Create Notification Channel
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         val channel = NotificationChannel(
@@ -134,7 +133,7 @@ class Notification : BroadcastReceiver() {
 
                     // Create notification
                     val notification = NotificationCompat.Builder(
-                        appContext,
+                        context,
                         "weather_location_channel"
                     )
                         .setContentTitle("Daily Weather Update")
@@ -150,8 +149,8 @@ class Notification : BroadcastReceiver() {
                     Log.i("TAG", "IN TRY")
                     // Initialise locationClient
                     val locationClient = DefaultLocationClient(
-                        appContext,
-                        LocationServices.getFusedLocationProviderClient(appContext)
+                        context,
+                        LocationServices.getFusedLocationProviderClient(context)
                     )
 
                     // Get updated location
@@ -165,7 +164,7 @@ class Notification : BroadcastReceiver() {
                             val appid = "ed339cdb731796705ce70f8b33f20291"
 
                             val response =
-                                WeatherApi.weatherRepository.getWeatherLocation(appid, lat, long)
+                                WeatherApi(context).weatherRepository.getWeatherLocation(appid, lat, long)
                             val main = response.weather.firstOrNull()?.main
                             if (main != null) {
                                 createNotification(main)
@@ -179,11 +178,12 @@ class Notification : BroadcastReceiver() {
             ACTION_ALARM_4 -> {
                 try {
                     val calorieRepository =
-                        CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
+                        CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
                     val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "")
                     GlobalScope.launch(Dispatchers.IO) {
                         calorieRepository.insert(newCalorie)
                     }
+                    CalorieCountRepository.calorieCount = 0.0
                 } catch (e: Exception) {
                     Log.e("TAG", "${e.message}")
                 }

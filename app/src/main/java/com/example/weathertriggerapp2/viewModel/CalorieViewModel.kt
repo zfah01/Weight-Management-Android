@@ -1,32 +1,30 @@
 package com.example.weathertriggerapp2.viewModel
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
-import android.content.Intent
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.weathertriggerapp2.broadcast.Notification
-import com.example.weathertriggerapp2.data.Calorie
 import com.example.weathertriggerapp2.data.NutritionResponse
 import com.example.weathertriggerapp2.network.NutritionApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
-import com.example.weathertriggerapp2.repository.CalorieRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
 
-class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewModel() {
+/**
+ * Class representing ViewModel
+ * */
+class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
 
-    var totalCalories = 0.0
+    private var totalCalories = 0.0
     var foodUiState by mutableStateOf<List<NutritionResponse>?>(null)
         private set
 
-    fun setCalorieCount(newValue: Double) {
+    private fun setCalorieCount(newValue: Double) {
         CalorieCountRepository.calorieCount = newValue
         Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
     }
@@ -35,7 +33,7 @@ class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewM
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val query = servingSize + "g " + foodItem
-                val response = NutritionApi.nutritionRepository.getNutritionInfo(query, "f7In2PE7kPlaQSKXU+WR6g==KpmVcVM9KH707liC")
+                val response = NutritionApi(context).nutritionRepository.getNutritionInfo(query, "f7In2PE7kPlaQSKXU+WR6g==KpmVcVM9KH707liC")
                 foodUiState = response
 
                 for((j, _) in response.withIndex()){
@@ -44,11 +42,6 @@ class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewM
                 }
                 Log.i(TAG, "RESULT: $totalCalories")
                 setCalorieCount(totalCalories)
-
-
-                // MOVE TO WORKER CLASS AND INSERT AT SPECIFIC TIME
-//                val newCalorie = Calorie(0, totalCalories, 0.0, "")
-//                calorieRepository.insert(newCalorie)
             } catch (e: Exception) {
                 Log.e(TAG, "Error occurred: ${e.message}", e)
             }

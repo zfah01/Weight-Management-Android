@@ -2,17 +2,19 @@ package com.example.weathertriggerapp2.notificationHandler
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
-import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.ContextCompat.getSystemService
 import com.example.weathertriggerapp2.broadcast.Notification
 import java.util.Calendar
-import java.util.Date
-import java.util.TimeZone
 
 
+// https://www.geeksforgeeks.org/schedule-notifications-in-android/
+// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
+
+/**
+ * Class for scheduling weather update notification
+ * */
 class WeatherNotification(val context: Context) {
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleWeatherNotification() {

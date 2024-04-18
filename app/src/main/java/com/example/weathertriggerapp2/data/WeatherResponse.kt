@@ -1,5 +1,8 @@
 package com.example.weathertriggerapp2.data
 
+/**
+ * Data class to represent the OpenWeather API response
+ * */
 data class WeatherResponse(
     val coord: Coord,
     val weather: List<Weather>,

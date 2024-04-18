@@ -1,5 +1,8 @@
 package com.example.weathertriggerapp2.data
 
+/**
+ * Data class to represent the Nutrition API response
+ * */
 data class NutritionResponse(
     val name: String,
     val calories : Double,

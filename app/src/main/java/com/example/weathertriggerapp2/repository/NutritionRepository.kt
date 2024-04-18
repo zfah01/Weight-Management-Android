@@ -3,6 +3,9 @@ package com.example.weathertriggerapp2.repository
 import com.example.weathertriggerapp2.data.NutritionResponse
 import com.example.weathertriggerapp2.network.NutritionApiService
 
+/**
+ * Interface representing Nutrition Repository
+ * */
 interface NutritionRepository {
     suspend fun getNutritionInfo(query : String, header : String) : List<NutritionResponse>
 }

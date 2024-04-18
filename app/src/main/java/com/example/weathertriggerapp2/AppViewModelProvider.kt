@@ -5,12 +5,13 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.weathertriggerapp2.viewModel.CalorieViewModel
+import android.content.Context
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             CalorieViewModel(
-                CalorieApplication().container.calorieRepository
+                CalorieApplication()
             )
         }
     }

@@ -5,6 +5,9 @@ import com.example.weathertriggerapp2.data.Calorie
 import com.example.weathertriggerapp2.data.CalorieDao
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Interface representing Calorie Repository
+ * */
 open class CalorieRepository(private val calorieDao: CalorieDao) {
     @WorkerThread
     open suspend fun insert(calorie: Calorie) {
