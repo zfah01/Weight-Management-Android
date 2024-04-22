@@ -240,7 +240,7 @@ class Notification : BroadcastReceiver() {
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
 
-                    notificationManager.notify(4, notification.build())
+                    notificationManager.notify(5, notification.build())
                 }
                 createNotification()
             }
@@ -287,7 +287,7 @@ class Notification : BroadcastReceiver() {
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
 
-                    notificationManager.notify(5, notification.build())
+                    notificationManager.notify(6, notification.build())
                 }
                 createNotification()
             }
