@@ -20,7 +20,7 @@ class WeeklyStepsFeedbackNotification(val context: Context) {
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            2,
+            6,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
