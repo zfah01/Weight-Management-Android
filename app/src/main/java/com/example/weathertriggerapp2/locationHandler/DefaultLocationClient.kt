@@ -52,9 +52,7 @@ class DefaultLocationClient(
                     // get last fetched location
                     p0.locations.lastOrNull()?.let { location ->
                         // send location
-                        launch {
-                                send(location)
-                        }
+                        launch { send(location) }
                     }
                 }
             }

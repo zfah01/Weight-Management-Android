@@ -89,22 +89,15 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
-    //Room
-//    implementation("androidx.room:room-runtime:2.6.1")
-//    ksp("androidx.room:room-compiler:2.6.1")
-//    implementation("androidx.room:room-ktx:2.6.1")
-
     val room_version = "2.5.2"
 
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
 
-//    implementation("androidx.room:room-runtime:$room_version")
-//    annotationProcessor("androidx.room:room-compiler:$room_version")
-//
-//    // To use Kotlin annotation processing tool (kapt)
-//    kapt("androidx.room:room-compiler:$room_version")
-//    // To use Kotlin Symbol Processing (KSP)
-//    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.datastore:datastore-preferences:1.1.0")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 }

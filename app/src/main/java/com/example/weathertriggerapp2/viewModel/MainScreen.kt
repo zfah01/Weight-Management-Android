@@ -21,7 +21,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weathertriggerapp2.AppViewModelProvider
-import com.google.gson.Gson
 import com.example.weathertriggerapp2.data.NutritionResponse
 import kotlin.reflect.KFunction2
 
@@ -44,6 +43,8 @@ fun InputScreen(
     var isErrorFoodItem by rememberSaveable { mutableStateOf(false) }
     var isErrorServingSize by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf(false) }
+    var isSQLPresentItem by rememberSaveable { mutableStateOf(false) }
+    var isSQLPresentSize by rememberSaveable { mutableStateOf(false) }
 
     fun validateEmptyFieldFoodItem(text: String) {
         isErrorFoodItem = text.isEmpty() || text.isNullOrBlank()
@@ -51,6 +52,16 @@ fun InputScreen(
 
     fun validateEmptyFieldServingSize(text: String) {
         isErrorServingSize = text.isEmpty() || text.isNullOrBlank()
+    }
+
+    fun validateSQLInjectionItem(text: String) {
+        val regexPattern = Regex("^[a-zA-Z0-9' -]+$")
+        isSQLPresentItem = !text.matches(regexPattern)
+    }
+
+    fun validateSQLInjectionServingSize(text: String) {
+        val regexPattern = Regex("^[0-9]+$")
+        isSQLPresentSize = !text.matches(regexPattern)
     }
 
     Column(
@@ -63,6 +74,8 @@ fun InputScreen(
             onValueChange = {
                 foodItem = it
                 validateEmptyFieldFoodItem(foodItem)
+                validateSQLInjectionItem(foodItem)
+
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
@@ -76,6 +89,11 @@ fun InputScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+                else if (isSQLPresentItem) {
+                    Text(text = "Only use alphanumeric character and spaces",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             },
         )
         Spacer(modifier = Modifier.height(5.dp))
@@ -84,6 +102,7 @@ fun InputScreen(
             onValueChange = {
                 servingSize = it
                 validateEmptyFieldServingSize(servingSize)
+                validateSQLInjectionServingSize(servingSize)
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
@@ -97,11 +116,16 @@ fun InputScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+                else if (isSQLPresentSize) {
+                    Text(text = "Only use numeric characters",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             },
         )
         Button(
             onClick = {
-                if(!isErrorFoodItem && !isErrorServingSize && foodItem != "" && servingSize != "") {
+                if(!isErrorFoodItem && !isErrorServingSize && foodItem != "" && servingSize != "" && !isSQLPresentItem && !isSQLPresentSize) {
                     errorMessage = false
                     getCalorieInfo(foodItem, servingSize)
                     foodItem = ""

@@ -10,7 +10,7 @@ import retrofit2.http.Query
  * Interface representing Nutrition API http calls
  * */
 interface OpenWeatherApiService {
-    @Headers("Cache-Control: max-age=3600")
+    @Headers("Cache-Control: max-age=3600") // 1 hour - might change
     @GET("data/2.5/weather")
     fun getWeatherLocation(
         @Query("lat") latitude: Double,

@@ -11,7 +11,7 @@ import retrofit2.http.Query
  * Interface representing Nutrition API http calls
  * */
 interface NutritionApiService {
-    @Headers("Cache-Control: max-age=86400")
+    @Headers("Cache-Control: max-age=86400") // 1 Day - might change
     @GET("nutrition")
     fun getNutritionInfo(
         @Header("x-api-key") apiKey: String,
