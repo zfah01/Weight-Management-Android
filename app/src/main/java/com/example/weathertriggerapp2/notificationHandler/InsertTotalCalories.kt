@@ -29,7 +29,7 @@ class InsertTotalCalories(val context: Context) {
 
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.MINUTE, 59)
 
         val time = calendar.timeInMillis
 

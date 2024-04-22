@@ -30,8 +30,8 @@ class WeeklyCaloriesFeedbackNotification(val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-        calendar.set(Calendar.HOUR_OF_DAY, 9)
-        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.HOUR_OF_DAY, 18)
+        calendar.set(Calendar.MINUTE, 39)
         calendar.set(Calendar.SECOND, 0)
 
         if (calendar.timeInMillis < System.currentTimeMillis()) {

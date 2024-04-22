@@ -23,12 +23,25 @@ import java.util.Date
 class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewModel() {
 
     var totalCalories = 0.0
+    var totalSugar = 0.0
+    var totalSaturatedFat = 0.0
+
     var foodUiState by mutableStateOf<List<NutritionResponse>?>(null)
         private set
 
     fun setCalorieCount(newValue: Double) {
         CalorieCountRepository.calorieCount = newValue
         Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
+    }
+
+    fun setSaturatedFatIntake(newValue: Double) {
+        CalorieCountRepository.saturatedFatCount = newValue
+        Log.i("TAG", "FAT COUNT: " + CalorieCountRepository.saturatedFatCount)
+    }
+
+    fun setSugarIntake(newValue: Double) {
+        CalorieCountRepository.sugarCount = newValue
+        Log.i("TAG", "SUGAR COUNT: " + CalorieCountRepository.sugarCount)
     }
 
     fun getCalorieInfo(foodItem: String, servingSize : String) {
@@ -41,14 +54,13 @@ class CalorieViewModel(private val calorieRepository: CalorieRepository) : ViewM
                 for((j, _) in response.withIndex()){
                     Log.i(TAG, "TOTAL: " + (response[j].calories))
                     totalCalories += (response[j].calories)
+                    totalSugar += (response[j].sugar_g)
+                    totalSaturatedFat += (response[j].fat_saturated_g)
                 }
                 Log.i(TAG, "RESULT: $totalCalories")
                 setCalorieCount(totalCalories)
-
-
-                // MOVE TO WORKER CLASS AND INSERT AT SPECIFIC TIME
-//                val newCalorie = Calorie(0, totalCalories, 0.0, "")
-//                calorieRepository.insert(newCalorie)
+                setSugarIntake(totalSugar)
+                setSaturatedFatIntake(totalSaturatedFat)
             } catch (e: Exception) {
                 Log.e(TAG, "Error occurred: ${e.message}", e)
             }

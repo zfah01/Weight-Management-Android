@@ -31,6 +31,8 @@ class Notification : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(appContext: Context, intent: Intent) {
         val calorieCount = CalorieCountRepository.calorieCount
+        val fatIntake = CalorieCountRepository.saturatedFatCount
+        val sugarIntake = CalorieCountRepository.sugarCount
 //        Log.i("TAG", "calorieCount: $calorieCount")
         when (intent.action) {
             ACTION_ALARM_1 -> {
@@ -184,9 +186,9 @@ class Notification : BroadcastReceiver() {
 
             ACTION_ALARM_4 -> {
                 try {
-                    val calorieRepository =
-                        CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
-                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "", 0)
+                    val currNumWeek = getCurrWeek()
+                    val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(appContext).calorieDao())
+                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, fatIntake.toString(), sugarIntake.toString(), currNumWeek)
                     GlobalScope.launch(Dispatchers.IO) {
                         calorieRepository.insert(newCalorie)
                     }
@@ -196,22 +198,27 @@ class Notification : BroadcastReceiver() {
             }
 
             ACTION_ALARM_5 -> {
-                val repository = WeeklyFeedbackRepository.getInstance(appContext)
-                val currNumWeek = getCurrWeek()
+                fun getNotificationMessage(caloriesAmount: Double, weeklySteps : Double): String {
+                    val foodHabitsMessage: String = if (caloriesAmount in 2000.0..2500.0) {
+                        "Well Done! You have consumed a healthy average of ${caloriesAmount.toInt()} calories each day this week."
 
-                val calorieCount = repository.getWeeklyCalorieCount(currNumWeek)
-
-                fun getNotificationMessage(caloriesAmount: Double): String {
-                    return if (caloriesAmount in 12000.0..17500.0) {
-                        "Well Done! You have consumed a healthy amount of calories this week."
                     } else {
-                        "You haven't met your daily caloric intake this week! \n" +
-                                "Remember a healthy daily caloric is between 2000-2500 calories if you are aiming for weight loss. \n" +
-                         "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
+                        "You haven't met your daily calorie intake this week! You consumed an average of ${caloriesAmount.toInt()} calories. " +
+                                "Remember a healthy daily caloric is between 2000-2500 calories if you are aiming for healthy weight loss. \n"
+//                                "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
                     }
+
+                    val activityMessage: String = if (weeklySteps >= 10000.0) {
+                        "Congratulations! You have hit your weekly goal of 10,000 steps each day with an average of ${weeklySteps.toInt()}"
+                    } else {
+                        "You have not been able to hit your target step goal this week! You managed to achieve an average of ${weeklySteps.toInt()} per day. Don't be discouraged and keep up the good work!"
+                    }
+
+
+                    return foodHabitsMessage + "\n" + activityMessage
                 }
 
-                fun createNotification() {
+                fun createNotification(calorieCount : Double, weeklySteps : Double) {
                     Log.i("TAG", "CREATE NOTIFICATION WEEKLY CALORIES FEEDBACK")
                     val notificationManager =
                         appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -232,65 +239,78 @@ class Notification : BroadcastReceiver() {
                         appContext,
                         "weekly_calories_feedback_channel"
                     )
-                        .setContentTitle("Weekly Calories Check")
-                        .setContentText(
-                            calorieCount?.let { getNotificationMessage(it) }
-                        )
+                        .setContentTitle("Weekly Goals Check-in")
+                        .setStyle(NotificationCompat.BigTextStyle()
+                            .bigText(getNotificationMessage(calorieCount, weeklySteps)))
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
 
                     notificationManager.notify(5, notification.build())
                 }
-                createNotification()
-            }
-            ACTION_ALARM_6 -> {
-                val repository = WeeklyFeedbackRepository.getInstance(appContext)
-                val currNumWeek = getCurrWeek()
-                val stepsCount = repository.getWeeklyStepsCount(currNumWeek)
 
-                fun getNotificationMessage(stepsAmount: Double): String {
-                    return if (stepsAmount >= 70000.0) {
-                        "Congratulations! You have hit your weekly goal of 10,000 or more steps a day."
-                    } else {
-                        "You have not been able to hit your target goal this week! \n" +
-                                "Unfortunately, you have not been successful in achieving 10,000 or more steps a day this week. "
+                try {
+                    val repository = WeeklyFeedbackRepository.getInstance(appContext)
+                    val currNumWeek = getCurrWeek()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val weeklyCalories = repository.getWeeklyCalorieCount(currNumWeek)
+                        val weeklySteps = repository.getWeeklyStepsCount(currNumWeek)
+                        val daysRecorded = repository.getDaysRecorded(currNumWeek)
+                        val averageCalories = weeklyCalories / daysRecorded.toDouble()
+                        val averageSteps = weeklySteps / daysRecorded.toDouble()
+                        createNotification(averageCalories, averageSteps)
                     }
+                } catch (e: Exception) {
+                    Log.e("TAG", "${e.message}")
                 }
-
-                fun createNotification() {
-                    Log.i("TAG", "CREATE NOTIFICATION WEEKLY STEPS FEEDBACK")
-                    val notificationManager =
-                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    // Create Notification Channel
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val channel = NotificationChannel(
-                            "weekly_steps_feedback_channel",
-                            "Weekly Steps Feedback",
-                            NotificationManager.IMPORTANCE_DEFAULT
-                        ).apply {
-                            description = "Weekly Steps Feedback Update Channel"
-                        }
-                        notificationManager.createNotificationChannel(channel)
-                    }
-
-                    // Create notification
-                    val notification = NotificationCompat.Builder(
-                        appContext,
-                        "weekly_steps_feedback_channel"
-                    )
-                        .setContentTitle("Weekly Steps Check")
-                        .setContentText(
-                            stepsCount?.let { getNotificationMessage(it) }
-                        )
-                        .setSmallIcon(R.drawable.ic_launcher_background)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setAutoCancel(true)
-
-                    notificationManager.notify(6, notification.build())
-                }
-                createNotification()
             }
+//            ACTION_ALARM_6 -> {
+//                val repository = WeeklyFeedbackRepository.getInstance(appContext)
+//                val currNumWeek = getCurrWeek()
+//                val stepsCount = repository.getWeeklyStepsCount(currNumWeek)
+//
+//                fun getNotificationMessage(stepsAmount: Double): String {
+//                    return if (stepsAmount >= 70000.0) {
+//                        "Congratulations! You have hit your weekly goal of 10,000 or more steps a day."
+//                    } else {
+//                        "You have not been able to hit your target goal this week! \n" +
+//                                "Unfortunately, you have not been successful in achieving 10,000 or more steps a day this week. "
+//                    }
+//                }
+//
+//                fun createNotification() {
+//                    Log.i("TAG", "CREATE NOTIFICATION WEEKLY STEPS FEEDBACK")
+//                    val notificationManager =
+//                        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//                    // Create Notification Channel
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        val channel = NotificationChannel(
+//                            "weekly_steps_feedback_channel",
+//                            "Weekly Steps Feedback",
+//                            NotificationManager.IMPORTANCE_DEFAULT
+//                        ).apply {
+//                            description = "Weekly Steps Feedback Update Channel"
+//                        }
+//                        notificationManager.createNotificationChannel(channel)
+//                    }
+//
+//                    // Create notification
+//                    val notification = NotificationCompat.Builder(
+//                        appContext,
+//                        "weekly_steps_feedback_channel"
+//                    )
+//                        .setContentTitle("Weekly Steps Check")
+//                        .setContentText(
+//                            stepsCount?.let { getNotificationMessage(it) }
+//                        )
+//                        .setSmallIcon(R.drawable.ic_launcher_background)
+//                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                        .setAutoCancel(true)
+//
+//                    notificationManager.notify(6, notification.build())
+//                }
+//                createNotification()
+//            }
         }
     }
     private fun getCurrWeek(): Int {

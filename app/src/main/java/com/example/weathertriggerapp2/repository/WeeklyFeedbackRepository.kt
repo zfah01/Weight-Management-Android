@@ -25,4 +25,8 @@ class WeeklyFeedbackRepository private constructor(context: Context) {
     fun getWeeklyStepsCount(weekNum: Int): Double {
         return db.calorieDao().getStepsCountWeekly(weekNum)
     }
+
+    fun getDaysRecorded(weekNum: Int) : Int {
+        return db.calorieDao().getDaysRecorded(weekNum)
+    }
 }
