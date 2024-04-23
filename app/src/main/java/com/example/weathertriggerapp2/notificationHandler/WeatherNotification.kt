@@ -36,14 +36,14 @@ class WeatherNotification(val context: Context) {
         val batteryManager = context.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryCharge: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 
-        val calendar = Calendar.getInstance();
+        val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 9)
         calendar.set(Calendar.MINUTE, 0)
 
         val time = calendar.timeInMillis
 
-        // Only schedule of battery charge is over 35% as GPS tends to kill battery
-        if(batteryCharge >= 35) {
+        // Only schedule of battery charge is over 20% as GPS tends to kill battery
+        if(batteryCharge >= 20) {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 time,

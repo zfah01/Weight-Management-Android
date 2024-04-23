@@ -1,8 +1,11 @@
 package com.example.weathertriggerapp2
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -14,16 +17,38 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
 import com.example.weathertriggerapp2.viewModel.MainScreen
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
 
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.example.weathertriggerapp2.data.HalfwayWorker
 import com.example.weathertriggerapp2.notificationHandler.CalorieEndOfDayNotification
 import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotification
 import com.example.weathertriggerapp2.notificationHandler.InsertTotalCalories
 import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
+import com.example.weathertriggerapp2.notificationHandler.WeeklyGoalsFeedbackNotification
+import com.example.weathertriggerapp2.repository.CalorieCountRepository
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import kotlin.math.sqrt
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener {
+    private var sensorManager: SensorManager? = null;
+
+    private var running = false
+    private var magnitudePrevious = 0.0
+    private var stepCount = 0
+    private var lastResetDate: String? = null
+
+    private var lastReset = Calendar.getInstance()
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +65,14 @@ class MainActivity : ComponentActivity() {
         val alarmSchedulerCalorieMidday = CalorieMidDayNotification(applicationContext)
         val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
         val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
+        val alarmSchedulerWeeklyFeedback = WeeklyGoalsFeedbackNotification(applicationContext)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
         alarmSchedulerCalorieMidday.scheduleMiddayNotification()
         alarmSchedulerCalorieEod.scheduleEodNotification()
         alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
+        alarmSchedulerWeeklyFeedback.scheduleWeeklyGoalsNotification()
 
             setContent {
                 WeatherTriggerApp2Theme {
@@ -57,7 +87,79 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    // Checks if permissions are granted. If so, schedule notification worker
+    override fun onResume() {
+        super.onResume()
+        running = true
+        val movementSensor : Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        if(movementSensor == null) {
+            Toast.makeText(this, "No sensor on this device", Toast.LENGTH_SHORT).show()
+        }
+        else{
+            sensorManager?.registerListener(this, movementSensor, SensorManager.SENSOR_DELAY_UI)
+        }
+    }
+
+//    @SuppressLint("SimpleDateFormat")
+    override fun onSensorChanged(event: SensorEvent?) {
+        if(running){
+            val currDate = Calendar.getInstance();
+
+            if(currDate.get(Calendar.YEAR) != lastReset.get(Calendar.YEAR)
+                || currDate.get(Calendar.MONTH) != lastReset.get(Calendar.MONTH)
+                || currDate.get(Calendar.DAY_OF_MONTH) != lastReset.get(Calendar.DAY_OF_MONTH)
+            ){ resetSteps() }
+
+            var xacceleration = event?.values?.get(0)
+            var yacceleration = event?.values?.get(1)
+            var zacceleration = event?.values?.get(2)
+
+            var magnitude = sqrt((xacceleration!! *xacceleration + yacceleration!! *yacceleration + zacceleration!! *zacceleration).toDouble())
+
+            var magnitudeDelta = magnitude - magnitudePrevious
+
+            magnitudePrevious = magnitude
+
+            if(magnitudeDelta > 6){
+                stepCount++
+                updateStepCount(stepCount)
+                if(stepCount == 3){
+                    createWorkRequest("You've completed 50% of you step target!")
+                }
+                else if(stepCount == 6){
+                    createWorkRequest("You've hit your step target today! Go you!")
+                }
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    private fun createWorkRequest(message: String) {
+        val myWorkRequest = OneTimeWorkRequestBuilder<HalfwayWorker>()
+            .setInputData(
+                workDataOf(
+                    "title" to "Daily Steps",
+                    "message" to message,
+                )
+            )
+            .build()
+
+        WorkManager.getInstance(this).enqueue(myWorkRequest)
+    }
+
+    fun updateStepCount(newValue: Int) {
+        CalorieCountRepository.stepCount = newValue
+        Log.i("TAG", "COUNT: " + CalorieCountRepository.stepCount)
+    }
+
+    fun resetSteps(){
+        stepCount = 0;
+        lastReset = Calendar.getInstance();
+    }
+
+
+        // Checks if permissions are granted. If so, schedule notification worker
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -77,7 +179,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // Dialog alert if permissions are denied
-    private fun locationPermissionDeniedAlert() {
+    fun locationPermissionDeniedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Location Permission Has Been Denied")
             .setMessage(

@@ -4,9 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Data class for representing calories database table
- * */
 @Entity(tableName = "calories")
 data class Calorie(
     @PrimaryKey(autoGenerate = true)
@@ -14,7 +11,11 @@ data class Calorie(
     @ColumnInfo(name = "calorie_count")
     val calorieCount: String?,
     @ColumnInfo(name = "step_count")
-    val stepCount: Double,
-    @ColumnInfo(name = "most_common_food_type")
-    val mostCommonFoodType: String,
+    val stepCount: String,
+    @ColumnInfo(name = "sat_fat_intake")
+    val saturatedFat: String?,
+    @ColumnInfo(name = "sugar_intake")
+    val sugar: String?,
+    @ColumnInfo(name = "number_of_week")
+    val weekNum: Int
 )

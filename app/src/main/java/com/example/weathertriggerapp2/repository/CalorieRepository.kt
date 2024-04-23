@@ -13,4 +13,24 @@ open class CalorieRepository(private val calorieDao: CalorieDao) {
     open suspend fun insert(calorie: Calorie) {
         calorieDao.insert(calorie)
     }
+
+    open fun getStepsCountWeekly(weekNum: Int): Double {
+        return calorieDao.getStepsCountWeekly(weekNum)
+    }
+
+    open fun getWeeklyCalorieCount(weekNum: Int): Double {
+        return calorieDao.getCaloriesCountWeekly(weekNum)
+    }
+
+    open fun getDaysRecorded(weekNum: Int) : Int {
+        return calorieDao.getDaysRecorded(weekNum)
+    }
+
+    open fun getWeeklySugarCount(weekNum: Int) : Double {
+        return calorieDao.getSugarCountWeekly(weekNum)
+    }
+
+    open fun getWeeklyFatCount(weekNum: Int) : Double {
+        return calorieDao.getFatCountWeekly(weekNum)
+    }
 }

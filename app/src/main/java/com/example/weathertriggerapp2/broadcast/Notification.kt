@@ -20,15 +20,19 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Locale
 
-/**
- * Broadcast Receiver class for handling notifications
- * */
+// BroadcastReceiver for handling notifications
 class Notification : BroadcastReceiver() {
+
+    // Method called when the broadcast is received based on intent action
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context, intent: Intent) {
         val calorieCount = CalorieCountRepository.calorieCount
+        val fatIntake = CalorieCountRepository.saturatedFatCount
+        val sugarIntake = CalorieCountRepository.sugarCount
+        val stepCount = CalorieCountRepository.stepCount
         when (intent.action) {
             ACTION_ALARM_1 -> {
                 fun createNotification() {
@@ -62,15 +66,17 @@ class Notification : BroadcastReceiver() {
                 }
                 createNotification()
             }
+
             ACTION_ALARM_2 -> {
                 fun getNotificationMessage(caloriesAmount: Double): String {
-                    return if(caloriesAmount >= 2000.0) {
+                    return if (caloriesAmount >= 2000.0) {
                         "You have consumed $calorieCount calories today and met your daily calorie target! Well done!"
                     } else {
                         "You have consumed $calorieCount calories today! \n" +
                                 "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
                     }
                 }
+
                 fun createNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION EOD CALORIE")
                     val notificationManager =
@@ -102,6 +108,7 @@ class Notification : BroadcastReceiver() {
                 }
                 createNotification()
             }
+
             ACTION_ALARM_3 -> {
                 fun getNotificationMessage(weather: String): String {
                     return when (weather.lowercase(Locale.getDefault())) {
@@ -175,27 +182,115 @@ class Notification : BroadcastReceiver() {
                     Log.e("TAG", "${e.message}")
                 }
             }
+
             ACTION_ALARM_4 -> {
                 try {
-                    val calorieRepository =
-                        CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
-                    val newCalorie = Calorie(0, calorieCount.toString(), 0.0, "")
+                    val currNumWeek = getCurrWeek()
+                    val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
+                    val newCalorie = Calorie(0, calorieCount.toString(), stepCount.toString(), fatIntake.toString(), sugarIntake.toString(), currNumWeek)
                     GlobalScope.launch(Dispatchers.IO) {
                         calorieRepository.insert(newCalorie)
                     }
-                    CalorieCountRepository.calorieCount = 0.0
                 } catch (e: Exception) {
                     Log.e("TAG", "${e.message}")
                 }
             }
+
+            ACTION_ALARM_5 -> {
+                fun getNotificationMessage(caloriesAmount: Double, weeklySteps : Double): String {
+                    val foodHabitsMessage: String = if (caloriesAmount in 2000.0..2500.0) {
+                        "Well Done! You have consumed a healthy average of ${caloriesAmount.toInt()} calories each day this week."
+
+                    } else {
+                        "You haven't met your daily calorie intake this week! You consumed an average of ${caloriesAmount.toInt()} calories. " +
+                                "Remember a healthy daily caloric is between 2000-2500 calories if you are aiming for healthy weight loss. \n"
+//                                "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
+                    }
+
+                    val activityMessage: String = if (weeklySteps >= 10000.0) {
+                        "Congratulations! You have hit your weekly goal of 10,000 steps each day with an average of ${weeklySteps.toInt()}"
+                    } else {
+                        "You have not been able to hit your target step goal this week! You managed to achieve an average of ${weeklySteps.toInt()} per day. Don't be discouraged and keep up the good work!"
+                    }
+
+
+                    return foodHabitsMessage + "\n" + activityMessage
+                }
+
+                fun createNotification(calorieCount : Double, weeklySteps : Double) {
+                    Log.i("TAG", "CREATE NOTIFICATION WEEKLY CALORIES FEEDBACK")
+                    val notificationManager =
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    // Create Notification Channel
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val channel = NotificationChannel(
+                            "weekly_calories_feedback_channel",
+                            "Weekly Calories Feedback",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                        ).apply {
+                            description = "Weekly Feedback Update Channel"
+                        }
+                        notificationManager.createNotificationChannel(channel)
+                    }
+
+                    // Create notification
+                    val notification = NotificationCompat.Builder(
+                        context,
+                        "weekly_calories_feedback_channel"
+                    )
+                        .setContentTitle("Weekly Goals Check-in")
+                        .setStyle(NotificationCompat.BigTextStyle()
+                            .bigText(getNotificationMessage(calorieCount, weeklySteps)))
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true)
+
+                    notificationManager.notify(5, notification.build())
+                }
+
+                try {
+                    val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
+                    val currNumWeek = getCurrWeek()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val weeklyCalories = calorieRepository.getWeeklyCalorieCount(currNumWeek)
+                        val weeklySteps = calorieRepository.getStepsCountWeekly(currNumWeek)
+                        val daysRecorded = calorieRepository.getDaysRecorded(currNumWeek)
+
+                        val averageCalories = weeklyCalories / daysRecorded.toDouble()
+                        val averageSteps = weeklySteps / daysRecorded.toDouble()
+                        createNotification(averageCalories, averageSteps)
+                    }
+                } catch (e: Exception) {
+                    Log.e("TAG", "${e.message}")
+                }
+            }
+            ACTION_ALARM_6 -> {
+                val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
+                val currNumWeek = getCurrWeek()
+                GlobalScope.launch(Dispatchers.IO) {
+                    val weeklySugar = calorieRepository.getWeeklySugarCount(currNumWeek)
+                    val weeklyFat = calorieRepository.getWeeklyFatCount(currNumWeek)
+                    val daysRecorded = calorieRepository.getDaysRecorded(currNumWeek)
+
+                    val dailySugar = weeklySugar / daysRecorded.toDouble()
+                    val dailyFat = weeklyFat / daysRecorded.toDouble()
+                }
+            }
         }
     }
+    private fun getCurrWeek(): Int {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        return calendar.get(Calendar.WEEK_OF_YEAR)
+    }
 
-    // Calories (Mid and EOD), Weather, Insertion
     companion object ActionAlarms {
         const val ACTION_ALARM_1 = "Calories Midday"
         const val ACTION_ALARM_2 = "Calories EOD"
         const val ACTION_ALARM_3 = "Weather"
         const val ACTION_ALARM_4 = "Insert Calories"
+        const val ACTION_ALARM_5 = "Weekly Goals"
+        const val ACTION_ALARM_6 = "Weekly Eating Habits"
+//        const val ACTION_ALARM_7 = ""
     }
 }
