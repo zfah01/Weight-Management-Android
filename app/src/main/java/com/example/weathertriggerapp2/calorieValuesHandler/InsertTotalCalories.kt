@@ -1,4 +1,4 @@
-package com.example.weathertriggerapp2.notificationHandler
+package com.example.weathertriggerapp2.calorieValuesHandler
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
@@ -33,8 +33,8 @@ class InsertTotalCalories(val context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 11)
-        calendar.set(Calendar.MINUTE, 16)
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
 
         val time = calendar.timeInMillis
 

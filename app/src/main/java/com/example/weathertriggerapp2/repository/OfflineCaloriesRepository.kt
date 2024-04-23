@@ -10,4 +10,6 @@ class OfflineCaloriesRepository(private val calorieDao: CalorieDao) : CalorieRep
     override fun getDaysRecorded(weekNum: Int): Int = calorieDao.getDaysRecorded(weekNum)
     override fun getWeeklySugarCount(weekNum: Int): Double = calorieDao.getSugarCountWeekly(weekNum)
     override fun getWeeklyFatCount(weekNum: Int): Double = calorieDao.getFatCountWeekly(weekNum)
+    override fun delete(weekNum: Int) = calorieDao.delete(weekNum)
+
 }

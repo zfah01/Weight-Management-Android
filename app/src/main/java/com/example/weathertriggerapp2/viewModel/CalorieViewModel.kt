@@ -46,8 +46,15 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
         Log.i("TAG", "SUGAR COUNT: " + CalorieCountRepository.sugarCount)
     }
 
-    init {
-        // do a reset on variable values here
+    fun resetViewModel() {
+        totalCalories = 0.0
+        totalSugar = 0.0
+        totalSaturatedFat = 0.0
+        setCalorieCount(0.0)
+        setSugarIntake(0.0)
+        setSaturatedFatIntake(0.0)
+        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
+        Log.i("TAG", "COUNT: $totalCalories")
     }
 
     fun getCalorieInfo(foodItem: String, servingSize : String) {
@@ -58,6 +65,7 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
                 foodUiState = response
 
                 for((j, _) in response.withIndex()){
+                    Log.i(TAG, "TOTAL BEFORE: $totalCalories")
                     Log.i(TAG, "TOTAL: " + (response[j].calories))
                     totalCalories += (response[j].calories)
                     totalSugar += (response[j].sugar_g)

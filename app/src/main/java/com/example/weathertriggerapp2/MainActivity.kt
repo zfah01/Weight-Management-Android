@@ -1,7 +1,6 @@
 package com.example.weathertriggerapp2
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.hardware.SensorEventListener
@@ -31,13 +30,13 @@ import androidx.work.workDataOf
 import com.example.weathertriggerapp2.data.HalfwayWorker
 import com.example.weathertriggerapp2.notificationHandler.CalorieEndOfDayNotification
 import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotification
-import com.example.weathertriggerapp2.notificationHandler.InsertTotalCalories
+import com.example.weathertriggerapp2.calorieValuesHandler.InsertTotalCalories
+import com.example.weathertriggerapp2.notificationHandler.DistanceByAfternoon
 import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
+import com.example.weathertriggerapp2.notificationHandler.WeeklyEatingHabitsFeedbackNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyGoalsFeedbackNotification
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -46,9 +45,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var running = false
     private var magnitudePrevious = 0.0
     private var stepCount = 0
-    private var lastResetDate: String? = null
-
     private var lastReset = Calendar.getInstance()
+
+    private var stepGoal = 0
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,13 +66,19 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
         val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
         val alarmSchedulerWeeklyFeedback = WeeklyGoalsFeedbackNotification(applicationContext)
+        val alarmSchedulerWeeklyEatingHabitsFeedback = WeeklyEatingHabitsFeedbackNotification(applicationContext)
+        val alarmSchedulerDistanceByAfternoon = DistanceByAfternoon(applicationContext)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
+        CalorieCountRepository.goalSteps = stepGoal
+
+        alarmSchedulerDistanceByAfternoon.scheduleAfternoonNotification()
         alarmSchedulerCalorieMidday.scheduleMiddayNotification()
         alarmSchedulerCalorieEod.scheduleEodNotification()
         alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
         alarmSchedulerWeeklyFeedback.scheduleWeeklyGoalsNotification()
+        alarmSchedulerWeeklyEatingHabitsFeedback.scheduleWeeklyEatingHabitsNotification()
 
             setContent {
                 WeatherTriggerApp2Theme {
@@ -80,7 +86,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        MainScreen()
+                        MainScreen(applicationContext)
                     }
                 }
             }
@@ -107,7 +113,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             if(currDate.get(Calendar.YEAR) != lastReset.get(Calendar.YEAR)
                 || currDate.get(Calendar.MONTH) != lastReset.get(Calendar.MONTH)
                 || currDate.get(Calendar.DAY_OF_MONTH) != lastReset.get(Calendar.DAY_OF_MONTH)
-            ){ resetSteps() }
+            ){
+                resetSteps()
+            }
+
 
             var xacceleration = event?.values?.get(0)
             var yacceleration = event?.values?.get(1)
@@ -122,11 +131,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             if(magnitudeDelta > 6){
                 stepCount++
                 updateStepCount(stepCount)
-                if(stepCount == 3){
-                    createWorkRequest("You've completed 50% of you step target!")
-                }
-                else if(stepCount == 6){
-                    createWorkRequest("You've hit your step target today! Go you!")
+                if(stepCount == stepGoal){
+                    val distance = stepGoal * 0.00074
+                    createWorkRequest("You've matched yesterdays distance of $distance km! Go you! WHy don't we try for one more kilometer?")
                 }
             }
         }
@@ -153,7 +160,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         Log.i("TAG", "COUNT: " + CalorieCountRepository.stepCount)
     }
 
-    fun resetSteps(){
+    private fun resetSteps(){
+        stepGoal = stepCount
+        CalorieCountRepository.goalSteps = stepCount
         stepCount = 0;
         lastReset = Calendar.getInstance();
     }
@@ -171,7 +180,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             else {
                 // Schedule alarm
                 Log.i("TAG", "scheduling location notification")
-
                 val alarmSchedulerWeather = WeatherNotification(applicationContext)
                 alarmSchedulerWeather.scheduleWeatherNotification()
             }

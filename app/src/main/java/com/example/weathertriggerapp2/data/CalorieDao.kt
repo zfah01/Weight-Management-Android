@@ -13,8 +13,8 @@ interface CalorieDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(calorie: Calorie)
 
-    @Delete
-    fun delete(calorie: Calorie)
+    @Query("DELETE FROM calories WHERE number_of_week = :weekNum")
+    fun delete(weekNum: Int)
 
     @Query("SELECT SUM(step_count) FROM calories WHERE number_of_week = :weekNum")
     fun getStepsCountWeekly(weekNum: Int): Double

@@ -8,5 +8,7 @@ object CalorieCountRepository {
     var saturatedFatCount: Double? = 0.0
 
     var stepCount: Int? = 0
+
+    var goalSteps: Int? = 0
 }
 

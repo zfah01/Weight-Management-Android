@@ -45,8 +45,7 @@ class WeeklyEatingHabitsFeedbackNotification(val context: Context) {
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         calendar.set(Calendar.HOUR_OF_DAY, 12)
-        calendar.set(Calendar.MINUTE, 30)
-        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MINUTE, 0)
 
         if (calendar.timeInMillis < System.currentTimeMillis()) {
             calendar.add(Calendar.WEEK_OF_YEAR, 1)
@@ -58,9 +57,9 @@ class WeeklyEatingHabitsFeedbackNotification(val context: Context) {
             val calorieRepository = CalorieRepository(CalorieDatabase.getDatabase(context).calorieDao())
             val currNumWeek = getCurrWeek()
             GlobalScope.launch(Dispatchers.IO) {
-                val weeklySugar = calorieRepository.getWeeklySugarCount(currNumWeek)
-                val weeklyFat = calorieRepository.getWeeklyFatCount(currNumWeek)
-                val daysRecorded = calorieRepository.getDaysRecorded(currNumWeek)
+                val weeklySugar = calorieRepository.getWeeklySugarCount(currNumWeek - 1)
+                val weeklyFat = calorieRepository.getWeeklyFatCount(currNumWeek - 1)
+                val daysRecorded = calorieRepository.getDaysRecorded(currNumWeek - 1)
 
                 val dailySugar = weeklySugar / daysRecorded.toDouble()
                 val dailyFat = weeklyFat / daysRecorded.toDouble()

@@ -33,4 +33,8 @@ open class CalorieRepository(private val calorieDao: CalorieDao) {
     open fun getWeeklyFatCount(weekNum: Int) : Double {
         return calorieDao.getFatCountWeekly(weekNum)
     }
+
+    open fun delete(weekNum: Int) {
+        return calorieDao.delete(weekNum)
+    }
 }

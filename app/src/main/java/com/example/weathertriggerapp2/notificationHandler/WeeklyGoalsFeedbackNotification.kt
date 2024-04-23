@@ -32,7 +32,6 @@ class WeeklyGoalsFeedbackNotification(val context: Context) {
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         calendar.set(Calendar.HOUR_OF_DAY, 12)
         calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
 
         if (calendar.timeInMillis < System.currentTimeMillis()) {
             calendar.add(Calendar.WEEK_OF_YEAR, 1)

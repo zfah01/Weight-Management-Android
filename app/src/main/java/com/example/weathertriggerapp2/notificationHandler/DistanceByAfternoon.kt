@@ -8,29 +8,23 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
+import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import java.util.Calendar
 
-// https://www.geeksforgeeks.org/schedule-notifications-in-android/
-// https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
-
-/**
- * Class for scheduling midday calorie intake notification
- * */
-class CalorieMidDayNotification(val context: Context) {
+class DistanceByAfternoon(val context: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
-    fun scheduleMiddayNotification() {
+    fun scheduleAfternoonNotification() {
         val intent = Intent(context, Notification::class.java).apply {
-            action = Notification.ACTION_ALARM_1
+            action = Notification.ACTION_ALARM_7
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            1,
+            7,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val calendar = Calendar.getInstance()
