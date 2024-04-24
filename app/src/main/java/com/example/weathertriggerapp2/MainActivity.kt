@@ -17,13 +17,20 @@ import androidx.core.app.ActivityCompat
 import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
 import com.example.weathertriggerapp2.viewModel.MainScreen
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
+import android.media.audiofx.BassBoost
 
 
 import android.os.Build
+import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.Snackbar
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -36,49 +43,71 @@ import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyEatingHabitsFeedbackNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyGoalsFeedbackNotification
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.Calendar
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensorManager: SensorManager? = null;
 
     private var running = false
+    private var sensorPermission = false
     private var magnitudePrevious = 0.0
     private var stepCount = 0
     private var lastReset = Calendar.getInstance()
 
-    private var stepGoal = 0
+    private var stepGoal = 10
+    private var goalIncreased = false
+
+    var notificationCheck =  false
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Request Permissions - pop up should appear
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ), 0
-        )
 
-        val alarmSchedulerCalorieMidday = CalorieMidDayNotification(applicationContext)
-        val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
-        val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
-        val alarmSchedulerWeeklyFeedback = WeeklyGoalsFeedbackNotification(applicationContext)
-        val alarmSchedulerWeeklyEatingHabitsFeedback = WeeklyEatingHabitsFeedbackNotification(applicationContext)
-        val alarmSchedulerDistanceByAfternoon = DistanceByAfternoon(applicationContext)
+//        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_DENIED){
+//            requestPermissions(String{Mainfest.permission.POST_NOTIFICATIONS}, 1)
+//        }
+        showNotificationPermissionRationale()
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        Log.i("TAG", notificationCheck.toString())
+        if(notificationCheck){
+            Log.i("TAG", "NOTIFICATIONS SET")
+            // Request Permissions - pop up should appear
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACTIVITY_RECOGNITION
+                    ), 0
+                )
+            }
 
-        CalorieCountRepository.goalSteps = stepGoal
+            val alarmSchedulerCalorieMidday = CalorieMidDayNotification(applicationContext)
+            val alarmSchedulerCalorieEod = CalorieEndOfDayNotification(applicationContext)
+            val alarmSchedulerCalorieInsert = InsertTotalCalories(applicationContext)
+            val alarmSchedulerWeeklyFeedback = WeeklyGoalsFeedbackNotification(applicationContext)
+            val alarmSchedulerWeeklyEatingHabitsFeedback = WeeklyEatingHabitsFeedbackNotification(applicationContext)
 
-        alarmSchedulerDistanceByAfternoon.scheduleAfternoonNotification()
-        alarmSchedulerCalorieMidday.scheduleMiddayNotification()
-        alarmSchedulerCalorieEod.scheduleEodNotification()
-        alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
-        alarmSchedulerWeeklyFeedback.scheduleWeeklyGoalsNotification()
-        alarmSchedulerWeeklyEatingHabitsFeedback.scheduleWeeklyEatingHabitsNotification()
+            sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+            CalorieCountRepository.goalSteps = stepGoal
+            CalorieCountRepository.goalIncreased = goalIncreased
+
+            alarmSchedulerCalorieMidday.scheduleMiddayNotification()
+            alarmSchedulerCalorieEod.scheduleEodNotification()
+            alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
+            alarmSchedulerWeeklyFeedback.scheduleWeeklyGoalsNotification()
+            alarmSchedulerWeeklyEatingHabitsFeedback.scheduleWeeklyEatingHabitsNotification()
+        }
+
 
             setContent {
                 WeatherTriggerApp2Theme {
@@ -91,6 +120,19 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
 
+    }
+    private fun showNotificationPermissionRationale() {
+
+        AlertDialog.Builder(this)
+            .setTitle("Alert")
+            .setMessage("Notification permission is required, to show notification")
+            .setPositiveButton("Yes") { _, _ ->
+                Log.i("TAG", "HELO: " )
+                    notificationCheck = true
+                Log.i("TAG", notificationCheck.toString() )
+            }
+            .setNegativeButton("No", null)
+            .show()
     }
 
     override fun onResume() {
@@ -107,7 +149,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
 //    @SuppressLint("SimpleDateFormat")
     override fun onSensorChanged(event: SensorEvent?) {
-        if(running){
+        if(running && sensorPermission){
             val currDate = Calendar.getInstance();
 
             if(currDate.get(Calendar.YEAR) != lastReset.get(Calendar.YEAR)
@@ -133,10 +175,26 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 updateStepCount(stepCount)
                 if(stepCount == stepGoal){
                     val distance = stepGoal * 0.00074
-                    createWorkRequest("You've matched yesterdays distance of $distance km! Go you! WHy don't we try for one more kilometer?")
+                    val distanceRoundUp = roundOffDecimal(distance)
+                    if(!goalIncreased){
+                        createWorkRequest("You've matched yesterday's distance of $distanceRoundUp km! Go you! Why don't we try for one more kilometer?")
+                        stepGoal += 1352
+                        goalIncreased = true
+                        CalorieCountRepository.goalIncreased = true
+                    }
+                    else{
+                        createWorkRequest("You've hit your new distance goal of $distanceRoundUp km! Go you! Why don't we try for one more kilometer?")
+                        stepGoal += 1352
+                    }
                 }
             }
         }
+    }
+
+    private fun roundOffDecimal(distance : Double): Double {
+        val df = DecimalFormat("#.##")
+        df.roundingMode = RoundingMode.CEILING
+        return df.format(distance).toDouble()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -155,20 +213,23 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         WorkManager.getInstance(this).enqueue(myWorkRequest)
     }
 
-    fun updateStepCount(newValue: Int) {
+    private fun updateStepCount(newValue: Int) {
         CalorieCountRepository.stepCount = newValue
         Log.i("TAG", "COUNT: " + CalorieCountRepository.stepCount)
     }
 
     private fun resetSteps(){
         stepGoal = stepCount
+        goalIncreased = false
         CalorieCountRepository.goalSteps = stepCount
+        CalorieCountRepository.goalIncreased = false
         stepCount = 0;
         lastReset = Calendar.getInstance();
     }
 
 
-        // Checks if permissions are granted. If so, schedule notification worker
+    // Checks if permissions are granted. If so, schedule notification worker
+    @Deprecated("Deprecated in Java")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -176,18 +237,58 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         if (requestCode == 0) {
             if (grantResults.all { it == PackageManager.PERMISSION_DENIED }) {
                 locationPermissionDeniedAlert()
+                acceleratorPermissionDeniedAlert()
             }
             else {
-                // Schedule alarm
-                Log.i("TAG", "scheduling location notification")
-                val alarmSchedulerWeather = WeatherNotification(applicationContext)
-                alarmSchedulerWeather.scheduleWeatherNotification()
+                for (permission in permissions){
+                    val checkVal = ContextCompat.checkSelfPermission(applicationContext, permission)
+                    if(permission == Manifest.permission.ACTIVITY_RECOGNITION){
+                        if(checkVal == PackageManager.PERMISSION_GRANTED){
+                            Log.i("TAG", "scheduling accelerometer")
+
+                            sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+                            sensorPermission = true
+                            val alarmSchedulerDistanceByAfternoon = DistanceByAfternoon(applicationContext)
+                            alarmSchedulerDistanceByAfternoon.scheduleAfternoonNotification()
+                        }
+                        else{
+                            acceleratorPermissionDeniedAlert()
+                        }
+                    }
+                    else if(permission == Manifest.permission.ACCESS_COARSE_LOCATION || permission == Manifest.permission.ACCESS_FINE_LOCATION){
+                        if(checkVal == PackageManager.PERMISSION_GRANTED){
+                            // Schedule alarm
+                            Log.i("TAG", "scheduling location notification")
+                            val alarmSchedulerWeather = WeatherNotification(applicationContext)
+                            alarmSchedulerWeather.scheduleWeatherNotification()
+                        }
+                        else{
+                            locationPermissionDeniedAlert()
+                        }
+                    }
+                }
             }
         }
     }
 
+    private fun acceleratorPermissionDeniedAlert() {
+        AlertDialog.Builder(this)
+            .setTitle("Accelerator Permission Has Been Denied")
+            .setMessage(
+                "This app requires access to your accelerator sensor to provide movement data accurately. \n\n" +
+                        "To enable the movement notification, please ensure accelerator permissions are granted on your device. " +
+                        "Otherwise it will not run."
+            )
+            .setPositiveButton("OK") { dialog, _->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
     // Dialog alert if permissions are denied
-    fun locationPermissionDeniedAlert() {
+    private fun locationPermissionDeniedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Location Permission Has Been Denied")
             .setMessage(

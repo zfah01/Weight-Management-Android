@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.Calendar
 import java.util.Locale
 
@@ -41,6 +43,14 @@ class Notification : BroadcastReceiver() {
         val fatIntake = CalorieCountRepository.saturatedFatCount
         val sugarIntake = CalorieCountRepository.sugarCount
         val stepCount = CalorieCountRepository.stepCount
+
+        val goalSteps = CalorieCountRepository.goalSteps
+        val goalIncreased = CalorieCountRepository.goalIncreased
+        fun roundOffDecimal(distance: Double?): Any {
+            val df = DecimalFormat("#.##")
+            df.roundingMode = RoundingMode.CEILING
+            return df.format(distance).toDouble()
+        }
 
         var gender = ""
         val store = UserDataStore(context)
@@ -399,16 +409,18 @@ class Notification : BroadcastReceiver() {
             ACTION_ALARM_7 -> {
                 fun getNotificationMessage(): String {
                     val currDistance = (stepCount?.times(0.00074))
+                    val currDistanceRounded = roundOffDecimal(currDistance)
                     if (goalSteps != null) {
-                        val goalDistance = (goalSteps!!.times(0.00074))
-                        return if(goalSteps!! > 0) {
-                            val difference = (goalDistance - currDistance!!)
-                            "You are $difference km short of meeting yesterday's distance. Let's try and walk another kilometer!"
+                        val goalDistance = (goalSteps.times(0.00074))
+                        return if(goalSteps > 0) {
+                            val difference = goalDistance - currDistance!!
+                            val differenceRounded = roundOffDecimal(difference)
+                            "You are $differenceRounded km short of meeting yesterday's distance. Let's try and walk another kilometer!"
                         } else{
-                            "You've walked $currDistance km today! Let's keep going and walk another kilometer!"
+                            "You've walked $currDistanceRounded km today! Let's keep going and walk another kilometer!"
                         }
                     }
-                    return "You've walked $currDistance km today! Let's keep going and walk another kilometer!"
+                    return "You've walked $currDistanceRounded km today! Let's keep going and walk another kilometer!"
 
                 }
                 fun createNotification() {
@@ -440,9 +452,9 @@ class Notification : BroadcastReceiver() {
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                                 .setAutoCancel(true)
 
-                            notificationManager.notify(7, notification.build())
+                            notificationManager.notify(6, notification.build())
                         }
-                        if(stepCount < goalSteps!!) {
+                        if(stepCount < goalSteps!! && !goalIncreased) {
                             val notification = NotificationCompat.Builder(
                                 context,
                                 "distance_afternoon_channel"
@@ -453,7 +465,7 @@ class Notification : BroadcastReceiver() {
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                                 .setAutoCancel(true)
 
-                            notificationManager.notify(7, notification.build())
+                            notificationManager.notify(6, notification.build())
                         }
                     }
                 }

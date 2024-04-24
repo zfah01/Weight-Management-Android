@@ -10,5 +10,7 @@ object CalorieCountRepository {
     var stepCount: Int? = 0
 
     var goalSteps: Int? = 0
+
+    var goalIncreased: Boolean = false
 }
 
