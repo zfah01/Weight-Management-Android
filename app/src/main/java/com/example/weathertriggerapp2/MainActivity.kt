@@ -1,55 +1,50 @@
 package com.example.weathertriggerapp2
 
+
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
-import com.example.weathertriggerapp2.viewModel.MainScreen
-import android.content.Context
-import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.media.audiofx.BassBoost
-
-
-import android.os.Build
-import android.widget.Button
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.compose.material3.Snackbar
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.example.weathertriggerapp2.calorieValuesHandler.InsertTotalCalories
 import com.example.weathertriggerapp2.data.HalfwayWorker
 import com.example.weathertriggerapp2.notificationHandler.CalorieEndOfDayNotification
 import com.example.weathertriggerapp2.notificationHandler.CalorieMidDayNotification
-import com.example.weathertriggerapp2.calorieValuesHandler.InsertTotalCalories
 import com.example.weathertriggerapp2.notificationHandler.DistanceByAfternoon
+import com.example.weathertriggerapp2.notificationHandler.RandomisedExerciseNotification
 import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyEatingHabitsFeedbackNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyGoalsFeedbackNotification
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.math.RoundingMode
-import java.text.DecimalFormat
+import com.example.weathertriggerapp2.ui.theme.WeatherTriggerApp2Theme
+import com.example.weathertriggerapp2.util.roundOffDecimal
+import com.example.weathertriggerapp2.viewModel.MainScreen
 import java.util.Calendar
-//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 import kotlin.math.sqrt
 
+
+/**
+ * Main Activity class for application
+ * */
 class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensorManager: SensorManager? = null;
 
@@ -62,23 +57,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var stepGoal = 10
     private var goalIncreased = false
 
-    var notificationCheck =  false
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-//        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_DENIED){
-//            requestPermissions(String{Mainfest.permission.POST_NOTIFICATIONS}, 1)
-//        }
-        showNotificationPermissionRationale()
-
-        Log.i("TAG", notificationCheck.toString())
-        if(notificationCheck){
-            Log.i("TAG", "NOTIFICATIONS SET")
-            // Request Permissions - pop up should appear
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ActivityCompat.requestPermissions(
                     this,
@@ -106,8 +88,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             alarmSchedulerCalorieInsert.scheduleInsertCalorieNotification()
             alarmSchedulerWeeklyFeedback.scheduleWeeklyGoalsNotification()
             alarmSchedulerWeeklyEatingHabitsFeedback.scheduleWeeklyEatingHabitsNotification()
-        }
-
 
             setContent {
                 WeatherTriggerApp2Theme {
@@ -120,19 +100,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
 
-    }
-    private fun showNotificationPermissionRationale() {
-
-        AlertDialog.Builder(this)
-            .setTitle("Alert")
-            .setMessage("Notification permission is required, to show notification")
-            .setPositiveButton("Yes") { _, _ ->
-                Log.i("TAG", "HELO: " )
-                    notificationCheck = true
-                Log.i("TAG", notificationCheck.toString() )
-            }
-            .setNegativeButton("No", null)
-            .show()
     }
 
     override fun onResume() {
@@ -147,15 +114,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-//    @SuppressLint("SimpleDateFormat")
+    /**
+     * function to measure steps user has taken via accelerometer sensor
+     * */
     override fun onSensorChanged(event: SensorEvent?) {
         if(running && sensorPermission){
             val currDate = Calendar.getInstance();
 
             if(currDate.get(Calendar.YEAR) != lastReset.get(Calendar.YEAR)
                 || currDate.get(Calendar.MONTH) != lastReset.get(Calendar.MONTH)
-                || currDate.get(Calendar.DAY_OF_MONTH) != lastReset.get(Calendar.DAY_OF_MONTH)
-            ){
+                || currDate.get(Calendar.DAY_OF_MONTH) != lastReset.get(Calendar.DAY_OF_MONTH)){
                 resetSteps()
             }
 
@@ -191,15 +159,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-    private fun roundOffDecimal(distance : Double): Double {
-        val df = DecimalFormat("#.##")
-        df.roundingMode = RoundingMode.CEILING
-        return df.format(distance).toDouble()
-    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-    }
-
+    /**
+     * Create one time work request for steps
+     * */
     private fun createWorkRequest(message: String) {
         val myWorkRequest = OneTimeWorkRequestBuilder<HalfwayWorker>()
             .setInputData(
@@ -213,11 +177,17 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         WorkManager.getInstance(this).enqueue(myWorkRequest)
     }
 
-    private fun updateStepCount(newValue: Int) {
-        CalorieCountRepository.stepCount = newValue
+    /**
+     * Setter functional for step count
+     * */
+    private fun updateStepCount(stepValue: Int) {
+        CalorieCountRepository.stepCount = stepValue
         Log.i("TAG", "COUNT: " + CalorieCountRepository.stepCount)
     }
 
+    /**
+     * Reset sensor values and new step goal
+     * */
     private fun resetSteps(){
         stepGoal = stepCount
         goalIncreased = false
@@ -228,12 +198,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
 
-    // Checks if permissions are granted. If so, schedule notification worker
+    /**
+     * Function that checks if permissions are granted. If so, schedule notification worker
+     * */
     @Deprecated("Deprecated in Java")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // location permission
         if (requestCode == 0) {
             if (grantResults.all { it == PackageManager.PERMISSION_DENIED }) {
                 locationPermissionDeniedAlert()
@@ -258,13 +229,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     }
                     else if(permission == Manifest.permission.ACCESS_COARSE_LOCATION || permission == Manifest.permission.ACCESS_FINE_LOCATION){
                         if(checkVal == PackageManager.PERMISSION_GRANTED){
-                            // Schedule alarm
                             Log.i("TAG", "scheduling location notification")
                             val alarmSchedulerWeather = WeatherNotification(applicationContext)
                             alarmSchedulerWeather.scheduleWeatherNotification()
                         }
                         else{
                             locationPermissionDeniedAlert()
+                            val scheduleAlarm = RandomisedExerciseNotification(applicationContext)
+                            scheduleAlarm.scheduleExerciseNotification()
                         }
                     }
                 }
@@ -272,6 +244,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * Dialog alert if permissions associated with accelerator are denied
+     * */
     private fun acceleratorPermissionDeniedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Accelerator Permission Has Been Denied")
@@ -287,14 +262,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             .show()
     }
 
-    // Dialog alert if permissions are denied
+    /**
+     * Dialog alert if permissions associated with location are denied
+     * */
     private fun locationPermissionDeniedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Location Permission Has Been Denied")
             .setMessage(
                 "This app requires access to your location to provide weather data accurately. \n\n" +
                 "To enable the weather notification, please ensure location permissions are granted on your device. " +
-                "Otherwise it will not run."
+                "Otherwise it will not run. \n\nIn the meantime, a daily exercise suggestion will run!"
             )
             .setPositiveButton("OK") { dialog, _->
                 dialog.dismiss()

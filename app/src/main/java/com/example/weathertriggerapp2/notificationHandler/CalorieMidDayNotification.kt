@@ -17,6 +17,9 @@ import java.util.Calendar
  * Class for scheduling midday calorie intake notification
  * */
 class CalorieMidDayNotification(val context: Context) {
+    /**
+     * Function for scheduling notification at 3pm
+     * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleMiddayNotification() {
@@ -36,6 +39,10 @@ class CalorieMidDayNotification(val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 15)
         calendar.set(Calendar.MINUTE, 0)
+
+        if (calendar.timeInMillis < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
 
         val time = calendar.timeInMillis
 

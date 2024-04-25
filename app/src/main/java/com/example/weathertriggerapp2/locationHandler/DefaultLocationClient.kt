@@ -1,27 +1,33 @@
 package com.example.weathertriggerapp2.locationHandler
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
-import kotlinx.coroutines.flow.Flow
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
 
 // https://www.youtube.com/watch?v=Jj14sw4Yxk0&list=LL&index=1
+
+/**
+ * Class representing Fused Location Provider Client
+ * */
 class DefaultLocationClient(
     private val context: Context,
     private val client: FusedLocationProviderClient // Get User Location
 ): LocationClient {
+
+    /**
+     * Function which fetches the user's current location
+     * */
     @SuppressLint("MissingPermission")
     override fun getLocationUpdates(interval: Long): Flow<Location> {
         return callbackFlow {

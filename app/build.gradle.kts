@@ -101,11 +101,13 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.8.22")
-    testImplementation("org.mockito:mockito-core:4.5.1")
-    androidTestImplementation("org.mockito:mockito-core:4.5.1")
-    androidTestImplementation("org.robolectric:robolectric:4.6.1")
-    androidTestImplementation("io.mockk:mockk-android:1.12.4")
-    androidTestImplementation("org.mockito:mockito-inline:4.5.1")
+//    testImplementation("org.mockito:mockito-core:4.5.1")
+//    androidTestImplementation("org.mockito:mockito-core:4.5.1")
+//    androidTestImplementation("org.robolectric:robolectric:4.6.1")
+//    androidTestImplementation("io.mockk:mockk-android:1.12.4")
+//    androidTestImplementation("org.mockito:mockito-inline:4.5.1")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
 
 }

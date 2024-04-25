@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">WeatherTriggerApp2</string>
+    <string name="food_item">Enter food item: </string>
+    <string name="input_required">Input required</string>
+    <string name="sql_present">Only use alphanumeric character and spaces</string>
+    <string name="serving_size">Enter serving size in grams (g): </string>
+    <string name="sql_present_numbers">Only use numeric characters</string>
+    <string name="add">Add</string>
+    <string name="error_message">"Input in both text fields are required"</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
 </resources>

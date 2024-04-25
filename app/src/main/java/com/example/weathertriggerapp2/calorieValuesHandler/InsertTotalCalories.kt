@@ -13,9 +13,13 @@ import java.util.Calendar
 // https://www.geeksforgeeks.org/schedule-notifications-in-android/
 // https://stackoverflow.com/questions/14980899/how-to-set-time-to-24-hour-format-in-calendar
 /**
- * Class for scheduling calorie insertion into 'calories'
+ * Class for scheduling calorie insertion into 'calories' table
  * */
 class InsertTotalCalories(val context: Context) {
+
+    /**
+     * Function for scheduling database insertion at 11.59pm
+     * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleInsertCalorieNotification() {

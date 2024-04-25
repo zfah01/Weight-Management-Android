@@ -10,20 +10,21 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
 import com.example.weathertriggerapp2.data.CalorieDatabase
-import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import com.example.weathertriggerapp2.repository.CalorieRepository
+import com.example.weathertriggerapp2.util.getCurrWeek
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+/**
+ * Class for scheduling sugar and saturated fats notification
+ * */
 class WeeklyEatingHabitsFeedbackNotification(val context: Context) {
-    fun getCurrWeek(): Int {
-        val calendar = Calendar.getInstance()
-        calendar.firstDayOfWeek = Calendar.MONDAY
-        return calendar.get(Calendar.WEEK_OF_YEAR)
-    }
+    /**
+     * Function for scheduling notification at 12pm
+     * */
     @OptIn(DelicateCoroutinesApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")

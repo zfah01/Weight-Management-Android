@@ -10,7 +10,13 @@ import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
 import java.util.Calendar
 
+/**
+ * Class for scheduling weekly feedback notification
+ * */
 class WeeklyGoalsFeedbackNotification(val context: Context) {
+    /**
+     * Function for scheduling notification at 12pm
+     * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleWeeklyGoalsNotification() {

@@ -8,10 +8,12 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.weathertriggerapp2.broadcast.Notification
-import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import java.util.Calendar
 
 class DistanceByAfternoon(val context: Context) {
+    /**
+     * Function for scheduling notification at 3pm
+     * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleAfternoonNotification() {
@@ -30,6 +32,10 @@ class DistanceByAfternoon(val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 15)
         calendar.set(Calendar.MINUTE, 0)
+
+        if (calendar.timeInMillis < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
 
         val time = calendar.timeInMillis
 

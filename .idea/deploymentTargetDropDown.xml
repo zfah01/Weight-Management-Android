@@ -5,6 +5,12 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="distanceTargetNotificationIsCreatedInCorrectIntent()">
+        <State />
+      </entry>
+      <entry key="exerciseNotificationIsCreatedInCorrectIntent()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

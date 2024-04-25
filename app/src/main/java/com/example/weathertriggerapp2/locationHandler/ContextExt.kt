@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 
-// Checks to see if permissions have been granted
+/**
+ * Function for checking if location permissions have been granted
+ * */
 fun Context.checkLocationPermission(): Boolean {
     return ContextCompat.checkSelfPermission(
         this,

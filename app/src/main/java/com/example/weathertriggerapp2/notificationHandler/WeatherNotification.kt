@@ -19,6 +19,9 @@ import java.util.Calendar
  * Class for scheduling weather update notification
  * */
 class WeatherNotification(val context: Context) {
+    /**
+     * Function for scheduling notification at 9am
+     * */
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleWeatherNotification() {
         val intent = Intent(context, Notification::class.java).apply {
@@ -39,6 +42,10 @@ class WeatherNotification(val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 9)
         calendar.set(Calendar.MINUTE, 0)
+
+        if (calendar.timeInMillis < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
 
         val time = calendar.timeInMillis
 

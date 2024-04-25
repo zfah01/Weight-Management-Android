@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="spacer">5dp</dimen>
+    <dimen name="spacer_add">16dp</dimen>
+</resources>
