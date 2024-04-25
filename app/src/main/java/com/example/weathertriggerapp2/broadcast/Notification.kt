@@ -6,9 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.text.util.Linkify
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.core.app.NotificationCompat
 import com.example.weathertriggerapp2.R
 import com.example.weathertriggerapp2.data.Calorie
@@ -17,14 +15,11 @@ import com.example.weathertriggerapp2.data.UserDataStore
 import com.example.weathertriggerapp2.locationHandler.DefaultLocationClient
 import com.example.weathertriggerapp2.network.WeatherApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
-import com.example.weathertriggerapp2.repository.CalorieCountRepository.goalSteps
 import com.example.weathertriggerapp2.repository.CalorieRepository
-import com.example.weathertriggerapp2.viewModel.CalorieViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -39,13 +34,13 @@ class Notification : BroadcastReceiver() {
     // Method called when the broadcast is received based on intent action
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context, intent: Intent) {
-        val calorieCount = CalorieCountRepository.calorieCount
+        var calorieCount = CalorieCountRepository.calorieCount
         val fatIntake = CalorieCountRepository.saturatedFatCount
         val sugarIntake = CalorieCountRepository.sugarCount
         val stepCount = CalorieCountRepository.stepCount
-
         val goalSteps = CalorieCountRepository.goalSteps
         val goalIncreased = CalorieCountRepository.goalIncreased
+
         fun roundOffDecimal(distance: Double?): Any {
             val df = DecimalFormat("#.##")
             df.roundingMode = RoundingMode.CEILING
@@ -61,70 +56,14 @@ class Notification : BroadcastReceiver() {
 
         when (intent.action) {
             ACTION_ALARM_1 -> {
-                fun createNotification() {
-                    Log.i("TAG", "CREATE NOTIFICATION MIDDAY CALORIE")
-                    val notificationManager =
-                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    // Create Notification Channel
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val channel = NotificationChannel(
-                            "calorie_midday_channel",
-                            "Calorie Midday Check In",
-                            NotificationManager.IMPORTANCE_DEFAULT
-                        ).apply {
-                            description = "Calorie Midday Reminder Channel"
-                        }
-                        notificationManager.createNotificationChannel(channel)
-                    }
-
-                    var message = ""
-
-                    if (calorieCount != null) {
-                        message = if(calorieCount > 0.0) {
-                            "So far, you have consumed $calorieCount calories! Keep it up!"
-                        } else {
-                            "Have you added your calorie intake for today yet? Remember to record it accurately track your progress!"
-                        }
-                    }
-                    // Create notification
-                    val notification = NotificationCompat.Builder(
-                        context,
-                        "calorie_midday_channel"
-                    )
-                        .setContentTitle("Midday Calorie Check In")
-                        .setStyle(NotificationCompat.BigTextStyle()
-                            .bigText(message))
-                        .setSmallIcon(R.drawable.ic_launcher_background)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setAutoCancel(true)
-
-                    notificationManager.notify(1, notification.build())
+                if (calorieCount == null) {
+                    calorieCount = 0.0
                 }
-                createNotification()
+                createMiddayCalorieNotification(context, calorieCount)
             }
 
             ACTION_ALARM_2 -> {
-                fun getNotificationMessage(caloriesAmount: Double): String {
-                    val minCalorieRange : Double = if(gender == "Male") {
-                        1900.0
-                    } else {
-                        1400.0
-                    }
-                    val maxCalorieRange : Double = if(gender == "Male") {
-                        2100.0
-                    } else {
-                        1600.0
-                    }
-                    return if ((gender == "Male" && caloriesAmount in minCalorieRange..maxCalorieRange) ||
-                        (gender == "Female" && caloriesAmount in minCalorieRange..maxCalorieRange)) {
-                        "You have consumed $calorieCount calories today and met your daily calorie target! Well done!"
-                    } else {
-                        "You have consumed $calorieCount calories today! \n" +
-                        "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
-                    }
-                }
-
-                fun createNotification() {
+                fun createEndOfDayCaloriesNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION EOD CALORIE")
                     val notificationManager =
                         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -146,28 +85,18 @@ class Notification : BroadcastReceiver() {
                         "calorie_eod_channel"
                     )
                         .setContentTitle("End of Day Calorie Check In")
-                        .setContentText(calorieCount?.let { getNotificationMessage(it) })
+                        .setContentText(calorieCount?.let { getEndOfDayNotificationMessage(it, gender) })
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
 
                     notificationManager.notify(2, notification.build())
                 }
-                createNotification()
+                createEndOfDayCaloriesNotification()
             }
 
             ACTION_ALARM_3 -> {
-                val outdoorActivities = arrayOf("walk", "run", "yoga session")
-                val indoorActivities = arrayOf("burpees", "push-ups", "arm extensions", "tummy twists")
-                fun getNotificationMessage(weather: String): String {
-                    return when (weather.lowercase(Locale.getDefault())) {
-                        "clear" -> "Weather near you is clear today! Do you have time for a ${outdoorActivities.randomOrNull()} today?"
-                        "no response" -> "Hmm, something went wrong with fetching your location. In the meantime, why don't you try some indoor exercises today like ${indoorActivities.randomOrNull()} or ${indoorActivities.randomOrNull()}?"
-                        else -> "Weather near you seems to be poor today. Why don't you try some indoor exercises today like ${indoorActivities.randomOrNull()} or ${indoorActivities.randomOrNull()} today?"
-                    }
-                }
-
-                fun createNotification(weather: String) {
+                fun createWeatherNotification(weather: String) {
                     Log.i("TAG", "CREATE NOTIFICATION")
                     val notificationManager =
                         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -190,7 +119,7 @@ class Notification : BroadcastReceiver() {
                     )
                         .setContentTitle("Daily Weather Update")
                         .setStyle(NotificationCompat.BigTextStyle()
-                            .bigText(getNotificationMessage(weather)))
+                            .bigText(getWeatherNotificationMessage(weather)))
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
@@ -215,14 +144,13 @@ class Notification : BroadcastReceiver() {
                             val long = location.longitude
                             val appid = "ed339cdb731796705ce70f8b33f20291"
 
-                            val response =
-                                WeatherApi(context).weatherRepository.getWeatherLocation(appid, lat, long)
+                            val response = WeatherApi(context).weatherRepository.getWeatherLocation(appid, lat, long)
                             var main = response.weather.firstOrNull()?.main
                             if (main != null) {
-                                createNotification(main)
+                                createWeatherNotification(main)
                             } else {
                                 main = "no response"
-                                createNotification(main)
+                                createWeatherNotification(main)
                             }
                         }
                     }
@@ -245,44 +173,7 @@ class Notification : BroadcastReceiver() {
             }
 
             ACTION_ALARM_5 -> {
-                fun getNotificationMessage(caloriesAmount: Double, weeklySteps : Double): String {
-                    if(!caloriesAmount.isNaN() || !weeklySteps.isNaN()) {
-                        val currDistance = (weeklySteps?.times(0.00074))
-                        val minCalorieRange: Double = if (gender == "Male") {
-                            1900.0
-                        } else {
-                            1400.0
-                        }
-                        val maxCalorieRange: Double = if (gender == "Male") {
-                            2100.0
-                        } else {
-                            1600.0
-                        }
-                        val foodHabitsMessage: String =
-                            if (caloriesAmount in minCalorieRange..maxCalorieRange) {
-                                "Well Done! You have consumed a healthy average of ${caloriesAmount.toInt()} calories each day this week."
-
-                            } else {
-                                "You haven't met your daily calorie intake this week! You consumed an average of ${caloriesAmount.toInt()} calories. " +
-                                        "Remember a healthy daily caloric is between $minCalorieRange - $maxCalorieRange calories if you are aiming for healthy weight loss. \n"
-//                                "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
-                            }
-
-                        val activityMessage: String = if (currDistance!! >= 2.5) {
-                            "Congratulations! You have hit an average of ${currDistance.toInt()} steps per day! Keep it up!"
-                        } else {
-                            "You have hit an average of ${currDistance.toInt()} steps per day! Why don't you try going for another kilometer?"
-                        }
-
-
-                        return foodHabitsMessage + "\n" + activityMessage
-                    }
-                    else {
-                        return "Seems like we don't have enough data yet! Keep up with the good work to build your profile!"
-                    }
-                }
-
-                fun createNotification(calorieCount : Double, weeklySteps : Double) {
+                fun createWeeklyFeedbackNotification(calorieCount : Double, weeklySteps : Double) {
                     Log.i("TAG", "CREATE NOTIFICATION WEEKLY CALORIES FEEDBACK")
                     Log.i("TAG", "CALORIES: $calorieCount STEPS: $weeklySteps")
                     val notificationManager =
@@ -306,7 +197,7 @@ class Notification : BroadcastReceiver() {
                     )
                         .setContentTitle("Weekly Goals Check-in")
                         .setStyle(NotificationCompat.BigTextStyle()
-                            .bigText(getNotificationMessage(calorieCount, weeklySteps)))
+                            .bigText(getWeeklyFeedbackMessage(calorieCount, weeklySteps, gender)))
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
@@ -325,7 +216,7 @@ class Notification : BroadcastReceiver() {
                         val averageCalories = weeklyCalories / daysRecorded.toDouble()
                         val averageSteps = weeklySteps / daysRecorded.toDouble()
 
-                        createNotification(averageCalories, averageSteps)
+                        createWeeklyFeedbackNotification(averageCalories, averageSteps)
                         calorieRepository.delete(currNumWeek-1)
                     }
                 } catch (e: Exception) {
@@ -333,32 +224,7 @@ class Notification : BroadcastReceiver() {
                 }
             }
             ACTION_ALARM_6 -> {
-                fun getNotificationMessage(dailySugar: Double, dailyFat : Double): String {
-                    val exceededSugarIntake = dailySugar - 30.0
-                    val exceededFatIntake = dailyFat - 30.0
-                    var sugarMessage = ""
-                    var fatMessage = ""
-                    if(dailySugar > 30.0) {
-                        sugarMessage = "You have exceeded your daily sugar limit of 30g by ${exceededSugarIntake.toInt()} last week. Try opting for water instead of fizzy drink or having less sugar in your daily cups of tea or coffee!"
-//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/how-does-sugar-in-our-diet-affect-our-health/#:~:text=Adults%20should%20have%20no%20more,day%20(5%20sugar%20cubes) "
-                    }
-                    if(dailyFat > 30.0) {
-                        fatMessage = "You have exceeded your daily saturated fats limit by ${exceededFatIntake.toInt()} last week. Try opting for less fatty foods, such as fatty meats or butter to improve heart health."
-//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/different-fats-nutrition/#:~:text=Saturated%20fat%20guidelines&text=The%20government%20recommends%20that%3A,children%20should%20have%20less"
-                    }
-
-                    if(sugarMessage.isEmpty() && fatMessage.isNotEmpty()) {
-                        return fatMessage
-                    }
-                    else if (sugarMessage.isNotEmpty() && fatMessage.isEmpty()) {
-                        return sugarMessage
-                    }
-                    else {
-                        return fatMessage + "\n" + sugarMessage
-                    }
-                }
-
-                fun createNotification(dailySugar : Double, dailyFat : Double) {
+                fun createSugarAndFatNotification(dailySugar : Double, dailyFat : Double) {
                     Log.i("TAG", "CREATE NOTIFICATION WEEKLY CALORIES FEEDBACK")
                     val notificationManager =
                         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -381,7 +247,7 @@ class Notification : BroadcastReceiver() {
                     )
                         .setContentTitle("Weekly Sugar and Fat Intake")
                         .setStyle(NotificationCompat.BigTextStyle()
-                            .bigText(getNotificationMessage(dailySugar, dailyFat)))
+                            .bigText(getSugarAndFatNotificationMessage(dailySugar, dailyFat)))
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
@@ -400,14 +266,14 @@ class Notification : BroadcastReceiver() {
 
                         val dailySugar = weeklySugar / daysRecorded.toDouble()
                         val dailyFat = weeklyFat / daysRecorded.toDouble()
-                        createNotification(dailySugar, dailyFat)
+                        createSugarAndFatNotification(dailySugar, dailyFat)
                     }
                 } catch (e: Exception) {
                     Log.e("TAG", "${e.message}")
                 }
             }
             ACTION_ALARM_7 -> {
-                fun getNotificationMessage(): String {
+                fun getDistanceNotificationMessage(): String {
                     val currDistance = (stepCount?.times(0.00074))
                     val currDistanceRounded = roundOffDecimal(currDistance)
                     if (goalSteps != null) {
@@ -421,9 +287,8 @@ class Notification : BroadcastReceiver() {
                         }
                     }
                     return "You've walked $currDistanceRounded km today! Let's keep going and walk another kilometer!"
-
                 }
-                fun createNotification() {
+                fun createDistanceNotification() {
                     Log.i("TAG", "CREATE NOTIFICATION DISTANCE AFTERNOON")
                     val notificationManager =
                         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -447,7 +312,7 @@ class Notification : BroadcastReceiver() {
                                 "distance_afternoon_channel"
                             )
                                 .setContentTitle("Afternoon Distance Check In")
-                                .setContentText(calorieCount?.let { getNotificationMessage() })
+                                .setContentText(calorieCount?.let { getDistanceNotificationMessage() })
                                 .setSmallIcon(R.drawable.ic_launcher_background)
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                                 .setAutoCancel(true)
@@ -460,7 +325,7 @@ class Notification : BroadcastReceiver() {
                                 "distance_afternoon_channel"
                             )
                                 .setContentTitle("Afternoon Distance Check In")
-                                .setContentText(calorieCount?.let { getNotificationMessage() })
+                                .setContentText(calorieCount?.let { getDistanceNotificationMessage() })
                                 .setSmallIcon(R.drawable.ic_launcher_background)
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                                 .setAutoCancel(true)
@@ -470,12 +335,145 @@ class Notification : BroadcastReceiver() {
                     }
                 }
                 Log.i("TAG", "HERE")
-                createNotification()
+                createDistanceNotification()
 
             }
         }
     }
-    private fun getCurrWeek(): Int {
+
+    fun createMiddayCalorieNotification(context: Context, calorieCount : Double) {
+        Log.i("TAG", "CREATE NOTIFICATION MIDDAY CALORIE")
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Create Notification Channel
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "calorie_midday_channel",
+                "Calorie Midday Check In",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Calorie Midday Reminder Channel"
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        var message = ""
+
+        if (calorieCount != null) {
+            message = if(calorieCount > 0.0) {
+                "So far, you have consumed $calorieCount calories! Keep it up!"
+            } else {
+                "Have you added your calorie intake for today yet? Remember to record it accurately track your progress!"
+            }
+        }
+        // Create notification
+        val notification = NotificationCompat.Builder(
+            context,
+            "calorie_midday_channel"
+        )
+            .setContentTitle("Midday Calorie Check In")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(message))
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+
+        notificationManager.notify(1, notification.build())
+    }
+
+    fun getEndOfDayNotificationMessage(caloriesAmount: Double, gender: String): String {
+        val minCalorieRange : Double = if(gender == "Male") {
+            1900.0
+        } else {
+            1400.0
+        }
+        val maxCalorieRange : Double = if(gender == "Male") {
+            2100.0
+        } else {
+            1600.0
+        }
+        return if ((gender == "Male" && caloriesAmount in minCalorieRange..maxCalorieRange) ||
+            (gender == "Female" && caloriesAmount in minCalorieRange..maxCalorieRange)) {
+            "You have consumed $caloriesAmount calories today and met your daily calorie target! Well done!"
+        } else {
+            "You have consumed $caloriesAmount calories today! \n" +
+                    "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
+        }
+    }
+
+    val outdoorActivities = arrayOf("walk", "run", "yoga session")
+    val indoorActivities = arrayOf("burpees", "push-ups", "arm extensions", "tummy twists")
+    fun getWeatherNotificationMessage(weather: String): String {
+        return when (weather.lowercase(Locale.getDefault())) {
+            "clear" -> "Weather near you is clear today! Do you have time for a ${outdoorActivities.randomOrNull()} today?"
+            "no response" -> "Hmm, something went wrong with fetching your location. In the meantime, why don't you try some indoor exercises today like ${indoorActivities.randomOrNull()} or ${indoorActivities.randomOrNull()}?"
+            else -> "Weather near you seems to be poor today. Why don't you try some indoor exercises today like ${indoorActivities.randomOrNull()} or ${indoorActivities.randomOrNull()} today?"
+        }
+    }
+
+    fun getSugarAndFatNotificationMessage(dailySugar: Double, dailyFat : Double): String {
+        val exceededSugarIntake = dailySugar - 30.0
+        val exceededFatIntake = dailyFat - 30.0
+        var sugarMessage = ""
+        var fatMessage = ""
+        if(dailySugar > 30.0) {
+            sugarMessage = "You have exceeded your daily sugar limit of 30g by ${exceededSugarIntake.toInt()} last week. Try opting for water instead of fizzy drink or having less sugar in your daily cups of tea or coffee!"
+//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/how-does-sugar-in-our-diet-affect-our-health/#:~:text=Adults%20should%20have%20no%20more,day%20(5%20sugar%20cubes) "
+        }
+        if(dailyFat > 30.0) {
+            fatMessage = "You have exceeded your daily saturated fats limit by ${exceededFatIntake.toInt()} last week. Try opting for less fatty foods, such as fatty meats or butter to improve heart health."
+//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/different-fats-nutrition/#:~:text=Saturated%20fat%20guidelines&text=The%20government%20recommends%20that%3A,children%20should%20have%20less"
+        }
+
+        if(sugarMessage.isEmpty() && fatMessage.isNotEmpty()) {
+            return fatMessage
+        }
+        else if (sugarMessage.isNotEmpty() && fatMessage.isEmpty()) {
+            return sugarMessage
+        }
+        else {
+            return fatMessage + "\n" + sugarMessage
+        }
+    }
+
+    fun getWeeklyFeedbackMessage(caloriesAmount: Double, weeklySteps : Double, gender: String): String {
+        if(!caloriesAmount.isNaN() || !weeklySteps.isNaN()) {
+            val currDistance = (weeklySteps?.times(0.00074))
+            val minCalorieRange: Double = if (gender == "Male") {
+                1900.0
+            } else {
+                1400.0
+            }
+            val maxCalorieRange: Double = if (gender == "Male") {
+                2100.0
+            } else {
+                1600.0
+            }
+            val foodHabitsMessage: String =
+                if (caloriesAmount in minCalorieRange..maxCalorieRange) {
+                    "Well Done! You have consumed a healthy average of ${caloriesAmount.toInt()} calories each day this week."
+
+                } else {
+                    "You haven't met your daily calorie intake this week! You consumed an average of ${caloriesAmount.toInt()} calories. " +
+                            "Remember a healthy daily caloric is between $minCalorieRange - $maxCalorieRange calories if you are aiming for healthy weight loss. \n"
+//                                "For a more accurate daily caloric intake, you are able to calculate this via: https://www.calculator.net/calorie-calculator.html"
+                }
+
+            val activityMessage: String = if (currDistance!! >= 2.5) {
+                "Congratulations! You have hit an average of ${currDistance.toInt()} steps per day! Keep it up!"
+            } else {
+                "You have hit an average of ${currDistance.toInt()} steps per day! Why don't you try going for another kilometer?"
+            }
+
+
+            return foodHabitsMessage + "\n" + activityMessage
+        }
+        else {
+            return "Seems like we don't have enough data yet! Keep up with the good work to build your profile!"
+        }
+    }
+
+    fun getCurrWeek(): Int {
         val calendar = Calendar.getInstance()
         calendar.firstDayOfWeek = Calendar.MONDAY
         return calendar.get(Calendar.WEEK_OF_YEAR)
