@@ -23,7 +23,8 @@ import java.util.Calendar
  * */
 class WeeklyEatingHabitsFeedbackNotification(val context: Context) {
     /**
-     * Function for scheduling notification at 12pm
+     * Function for scheduling notification at 12pm every Monday if the user's average saturated fat or sugar intake is
+     * over 30 grams (g)
      * */
     @OptIn(DelicateCoroutinesApi::class)
     @RequiresApi(Build.VERSION_CODES.O)

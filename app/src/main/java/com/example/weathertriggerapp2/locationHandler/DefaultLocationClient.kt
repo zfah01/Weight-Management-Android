@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 // https://www.youtube.com/watch?v=Jj14sw4Yxk0&list=LL&index=1
 
 /**
- * Class representing Fused Location Provider Client
+ * Class representing Default Fused Location Provider Client
  * */
 class DefaultLocationClient(
     private val context: Context,

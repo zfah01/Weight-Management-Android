@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
- * BroadcastReceiver for handling notifications
+ * BroadcastReceiver for handling notifications broadcast by alarm manager in 'notificationHandler'
  * */
 class Notification : BroadcastReceiver() {
     var middayCalorie = false
@@ -45,7 +45,7 @@ class Notification : BroadcastReceiver() {
     var randomExercise = false
 
     /**
-     * Method called when the broadcast is received based on intent action
+     * Function called when the broadcast is received based on intent action
      * */
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context, intent: Intent) {
@@ -332,7 +332,7 @@ class Notification : BroadcastReceiver() {
     /**
      * Function to build weekly feedback notification
      * */
-    private fun createWeeklyFeedbackNotification(context: Context, calorieCount : Double, weeklySteps : Double, gender: String) {
+    fun createWeeklyFeedbackNotification(context: Context, calorieCount : Double, weeklySteps : Double, gender: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

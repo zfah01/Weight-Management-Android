@@ -15,7 +15,7 @@ import java.util.Calendar
  * */
 class WeeklyGoalsFeedbackNotification(val context: Context) {
     /**
-     * Function for scheduling notification at 12pm
+     * Function for scheduling notification at 12pm every Monday
      * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
