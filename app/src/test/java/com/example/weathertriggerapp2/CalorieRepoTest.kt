@@ -27,15 +27,14 @@ class CalorieRepoTest {
     }
 
     @Test
-    suspend fun testInsert() {
-        val testVal = Calorie(1, "3000.0", "6000.0", "250.0", "109.0", 1);
+    fun testInsert() = runBlocking {
+        val testVal = Calorie(1, "2578.0", "7500.0", "200.0", "80.0", 2);
 
-        runBlocking {
-            calorieRepo.insert(testVal)
-        }
+        calorieRepo.insert(testVal)
 
         verify(calorieMockDao).insert(testVal)
     }
+
 
     @Test
     fun testWeeklySteps() {
