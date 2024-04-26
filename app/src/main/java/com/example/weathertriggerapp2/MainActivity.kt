@@ -36,6 +36,7 @@ import com.example.weathertriggerapp2.notificationHandler.WeatherNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyEatingHabitsFeedbackNotification
 import com.example.weathertriggerapp2.notificationHandler.WeeklyGoalsFeedbackNotification
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
+import com.example.weathertriggerapp2.viewModel.CalorieViewModel
 import java.util.Calendar
 import kotlin.math.sqrt
 
