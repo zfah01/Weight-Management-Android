@@ -180,9 +180,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     /**
      * Setter functional for step count
      * */
-    private fun updateStepCount(stepValue: Int) {
+    fun updateStepCount(stepValue: Int) {
         CalorieCountRepository.stepCount = stepValue
-        Log.i("TAG", "COUNT: " + CalorieCountRepository.stepCount)
     }
 
     /**

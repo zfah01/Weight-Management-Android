@@ -16,6 +16,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BroadcastReceiverTest {
+
     @Test
     fun middayCalorieNotificationIsCreatedInCorrectIntent() {
         val intent = Intent(ACTION_ALARM_1)

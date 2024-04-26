@@ -31,12 +31,11 @@ fun getEndOfDayNotificationMessage(caloriesAmount: Double, gender: String): Stri
     return if(caloriesAmount == 0.0) {
         "Have you added your calorie intake for today yet? Remember to record it accurately track your progress!"
     }
-    else if ((gender == "Male" && caloriesAmount in minCalorieRange..maxCalorieRange) ||
-        (gender == "Female" && caloriesAmount in minCalorieRange..maxCalorieRange)) {
+    else if ((caloriesAmount in minCalorieRange..maxCalorieRange)) {
         "You have consumed $caloriesAmount calories today and met your daily calorie target! Well done!"
     } else {
         "You have consumed $caloriesAmount calories today! \n" +
-                "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
+                "Unfortunately, you didn't quite meet your calorie target of $minCalorieRange - $maxCalorieRange for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
     }
 }
 
@@ -65,21 +64,19 @@ fun getSugarAndFatNotificationMessage(dailySugar: Double, dailyFat : Double): St
     var fatMessage = ""
     if(dailySugar > 30.0) {
         sugarMessage = "You have exceeded your daily sugar limit of 30g by ${exceededSugarIntake.toInt()} last week. Try opting for water instead of fizzy drink or having less sugar in your daily cups of tea or coffee!"
-//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/how-does-sugar-in-our-diet-affect-our-health/#:~:text=Adults%20should%20have%20no%20more,day%20(5%20sugar%20cubes) "
     }
     if(dailyFat > 30.0) {
         fatMessage = "You have exceeded your daily saturated fats limit by ${exceededFatIntake.toInt()} last week. Try opting for less fatty foods, such as fatty meats or butter to improve heart health."
-//                                "\nFor more information, visit: https://www.nhs.uk/live-well/eat-well/food-types/different-fats-nutrition/#:~:text=Saturated%20fat%20guidelines&text=The%20government%20recommends%20that%3A,children%20should%20have%20less"
     }
 
-    if(sugarMessage.isEmpty() && fatMessage.isNotEmpty()) {
-        return fatMessage
+    return if(sugarMessage.isEmpty() && fatMessage.isNotEmpty()) {
+        fatMessage
     }
     else if (sugarMessage.isNotEmpty() && fatMessage.isEmpty()) {
-        return sugarMessage
+        sugarMessage
     }
     else {
-        return fatMessage + "\n" + sugarMessage
+        fatMessage + "\n" + sugarMessage
     }
 }
 
@@ -91,7 +88,7 @@ fun getSugarAndFatNotificationMessage(dailySugar: Double, dailyFat : Double): St
  * */
 fun getWeeklyFeedbackMessage(caloriesAmount: Double, weeklySteps : Double, gender: String): String {
     if(!caloriesAmount.isNaN() || !weeklySteps.isNaN()) {
-        val currDistance = (weeklySteps?.times(0.00074))
+        val currDistance = (weeklySteps.times(0.00074))
         val minCalorieRange: Double = if (gender == "Male") {
             1900.0
         } else {
@@ -113,7 +110,7 @@ fun getWeeklyFeedbackMessage(caloriesAmount: Double, weeklySteps : Double, gende
             }
 
         val activityMessage: String = if (currDistance!! >= 2.5) {
-            "Congratulations! You have hit an average of ${currDistance.toInt()} steps per day! Keep it up!"
+            "Congratulations! You have hit an average of ${currDistance.toInt()} km per day! Keep it up!"
         } else {
             "You have hit an average of ${currDistance.toInt()} km per day! Why don't you try going for another kilometer?"
         }
@@ -132,7 +129,7 @@ fun getWeeklyFeedbackMessage(caloriesAmount: Double, weeklySteps : Double, gende
  * @param goalSteps - target step goal
  * */
 fun getDistanceNotificationMessage(stepCount: Int, goalSteps: Int?): String {
-    val currDistance = (stepCount?.times(0.00074))
+    val currDistance = (stepCount.times(0.00074))
     val currDistanceRounded = roundOffDecimal(currDistance)
     if (goalSteps != null) {
         val goalDistance = (goalSteps.times(0.00074))

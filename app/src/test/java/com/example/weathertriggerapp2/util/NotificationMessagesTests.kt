@@ -1,12 +1,5 @@
-package com.example.weathertriggerapp2
+package com.example.weathertriggerapp2.util
 
-import com.example.weathertriggerapp2.util.getDistanceNotificationMessage
-import com.example.weathertriggerapp2.util.getEndOfDayNotificationMessage
-import com.example.weathertriggerapp2.util.getSugarAndFatNotificationMessage
-import com.example.weathertriggerapp2.util.getWeatherNotificationMessage
-import com.example.weathertriggerapp2.util.getWeeklyFeedbackMessage
-import com.example.weathertriggerapp2.util.indoorActivities
-import com.example.weathertriggerapp2.util.outdoorActivities
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,7 +20,7 @@ class NotificationMessagesTests {
     fun calorieEndOfDayMessageMaleNotMetTargets() {
         val message = getEndOfDayNotificationMessage(2500.0, "Male")
         assertEquals(message, "You have consumed 2500.0 calories today! \n" +
-                "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
+                "Unfortunately, you didn't quite meet your calorie target of 1900.0 - 2100.0 for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
         )
     }
     @Test
@@ -40,7 +33,7 @@ class NotificationMessagesTests {
     fun calorieEndOfDayMessageFemaleNotMetTargets() {
         val message = getEndOfDayNotificationMessage(2000.0, "Female")
         assertEquals(message, "You have consumed 2000.0 calories today! \n" +
-                "Unfortunately, you didn't quite meet your calorie target for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
+                "Unfortunately, you didn't quite meet your calorie target of 1400.0 - 1600.0 for the day. Remember, maintaining a balanced diet is crucial for your overall well-being!"
         )
     }
 
@@ -92,35 +85,35 @@ class NotificationMessagesTests {
     fun weeklyFeedbackMessageMaleMetTargets() {
         val message = getWeeklyFeedbackMessage(2000.0, 5000.0, "Male")
         assertEquals(message, "Well Done! You have consumed a healthy average of 2000 calories each day this week." +
-        "\n" + "Congratulations! You have hit an average of 3 steps per day! Keep it up!")
+        "\n" + "Congratulations! You have hit an average of 3 km per day! Keep it up!")
     }
 
     @Test
     fun weeklyFeedbackMessageFemaleMetTargets() {
         val message = getWeeklyFeedbackMessage(1500.0, 5000.0, "Female")
         assertEquals(message, "Well Done! You have consumed a healthy average of 1500 calories each day this week." +
-                "\n" + "Congratulations! You have hit an average of 3 steps per day! Keep it up!")
+                "\n" + "Congratulations! You have hit an average of 3 km per day! Keep it up!")
     }
 
     @Test
     fun weeklyFeedbackMessageMaleMetCalorieTargets() {
         val message = getWeeklyFeedbackMessage(2000.0, 2000.0, "Male")
         assertEquals(message, "Well Done! You have consumed a healthy average of 2000 calories each day this week." +
-                "\n" + "You have hit an average of 1 steps per day! Why don't you try going for another kilometer?")
+                "\n" + "You have hit an average of 1 km per day! Why don't you try going for another kilometer?")
     }
 
     @Test
     fun weeklyFeedbackMessageFemaleMetCalorieTargets() {
         val message = getWeeklyFeedbackMessage(1500.0, 2000.0, "Female")
         assertEquals(message, "Well Done! You have consumed a healthy average of 1500 calories each day this week." +
-                "\n" + "You have hit an average of 1 steps per day! Why don't you try going for another kilometer?")
+                "\n" + "You have hit an average of 1 km per day! Why don't you try going for another kilometer?")
     }
 
     @Test
     fun weeklyFeedbackMessageMaleMetStepTargets() {
         val message = getWeeklyFeedbackMessage(2500.0, 5000.0, "Male")
         assertEquals(message, "You haven't met your daily calorie intake this week! You consumed an average of 2500 calories. Remember a healthy daily caloric is between 1900.0 - 2100.0 calories if you are aiming for healthy weight loss. " +
-                "\n\n" + "Congratulations! You have hit an average of 3 steps per day! Keep it up!")
+                "\n\n" + "Congratulations! You have hit an average of 3 km per day! Keep it up!")
     }
 
     @Test
@@ -128,7 +121,7 @@ class NotificationMessagesTests {
         val message = getWeeklyFeedbackMessage(2000.0, 5000.0, "Female")
         assertEquals(message,
             "You haven't met your daily calorie intake this week! You consumed an average of 2000 calories. Remember a healthy daily caloric is between 1400.0 - 1600.0 calories if you are aiming for healthy weight loss. " +
-                "\n\n" + "Congratulations! You have hit an average of 3 steps per day! Keep it up!")
+                "\n\n" + "Congratulations! You have hit an average of 3 km per day! Keep it up!")
     }
 
     @Test

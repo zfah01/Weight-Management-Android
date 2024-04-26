@@ -44,7 +44,7 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     calorieViewModel: CalorieViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    InputScreen(/*calorieUiState*/ calorieViewModel :: getCalorieInfo, modifier, applicationContext)
+    InputScreen(calorieViewModel :: getCalorieInfo, modifier, applicationContext)
 }
 
 /**

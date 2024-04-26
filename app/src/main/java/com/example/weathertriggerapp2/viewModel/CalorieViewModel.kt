@@ -9,40 +9,76 @@ import androidx.lifecycle.viewModelScope
 import com.example.weathertriggerapp2.network.NutritionApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 /**
  * Class representing CalorieViewModel
  * */
 class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
 
-    private var totalCalories = 0.0
-    private var totalSugar = 0.0
-    private var totalSaturatedFat = 0.0
+    var totalCalories = 0.0
+    var totalSugar = 0.0
+    var totalSaturatedFat = 0.0
+
+    /**
+     * Upon initialization, check to see if current time is midnight
+     * */
+    init {
+        viewModelScope.launch {
+            resetViewModelVariables()
+        }
+    }
+
+    /**
+     * Function to check if current time is midnight. If so, reset all variables to zero
+     * */
+    private suspend fun resetViewModelVariables() {
+        while (true) {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = System.currentTimeMillis()
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val timeAtCurrent = System.currentTimeMillis()
+            val timeAtMidnight = cal.timeInMillis
+            var time = timeAtMidnight - timeAtCurrent
+            if (time < 0) {
+                cal.add(Calendar.DAY_OF_MONTH, 1)
+                time = cal.timeInMillis - timeAtCurrent
+            }
+            Log.i(TAG, "resetting variables delayed until midnight")
+
+            delay(time)
+
+            Log.i(TAG, "currently midnight time to reset variables")
+
+            resetViewModel()
+        }
+    }
 
 
     /**
-     * Setter functional for calorie count
+     * Setter function for calorie count
      * */
-    private fun setCalorieCount(calorieValue: Double) {
+    fun setCalorieCount(calorieValue: Double) {
         CalorieCountRepository.calorieCount = calorieValue
-        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
     }
 
     /**
-     * Setter functional for saturated fat count
+     * Setter function for saturated fat count
      * */
-    private fun setSaturatedFatIntake(satFatValue: Double) {
+    fun setSaturatedFatIntake(satFatValue: Double) {
         CalorieCountRepository.saturatedFatCount = satFatValue
-        Log.i("TAG", "FAT COUNT: " + CalorieCountRepository.saturatedFatCount)
     }
 
     /**
-     * Setter functional for sugar count
+     * Setter function for sugar count
      * */
-    private fun setSugarIntake(sugarValue: Double) {
+    fun setSugarIntake(sugarValue: Double) {
         CalorieCountRepository.sugarCount = sugarValue
-        Log.i("TAG", "SUGAR COUNT: " + CalorieCountRepository.sugarCount)
     }
 
     /**
@@ -55,8 +91,6 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
         setCalorieCount(0.0)
         setSugarIntake(0.0)
         setSaturatedFatIntake(0.0)
-        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
-        Log.i("TAG", "COUNT: $totalCalories")
     }
 
     /**

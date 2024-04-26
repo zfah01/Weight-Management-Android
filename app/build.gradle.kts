@@ -63,6 +63,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.work:work-runtime:2.9.0")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.test:core-ktx:1.5.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -101,13 +102,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.8.22")
-//    testImplementation("org.mockito:mockito-core:4.5.1")
-//    androidTestImplementation("org.mockito:mockito-core:4.5.1")
-//    androidTestImplementation("org.robolectric:robolectric:4.6.1")
-//    androidTestImplementation("io.mockk:mockk-android:1.12.4")
-//    androidTestImplementation("org.mockito:mockito-inline:4.5.1")
-    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
 
 }

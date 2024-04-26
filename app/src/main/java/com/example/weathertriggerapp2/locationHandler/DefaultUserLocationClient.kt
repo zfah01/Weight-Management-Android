@@ -18,12 +18,12 @@ import kotlinx.coroutines.launch
 // https://www.youtube.com/watch?v=Jj14sw4Yxk0&list=LL&index=1
 
 /**
- * Class representing Default Fused Location Provider Client
+ * Class representing Default User Location Client
  * */
-class DefaultLocationClient(
+class DefaultUserLocationClient(
     private val context: Context,
     private val client: FusedLocationProviderClient // Get User Location
-): LocationClient {
+): UserLocationClient {
 
     /**
      * Function which fetches the user's current location
@@ -33,7 +33,7 @@ class DefaultLocationClient(
         return callbackFlow {
             // Error handling - missing location permission
                 if (!context.checkLocationPermission()) {
-                    throw LocationClient.LocationException("Missing Location Permission")
+                    throw UserLocationClient.LocationException("Missing Location Permission")
                 }
 
             // Ensure GPS and Network are enabled
@@ -42,7 +42,7 @@ class DefaultLocationClient(
             val networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
             if(!gpsEnabled && !networkEnabled) {
-                throw LocationClient.LocationException("GPS and Network is Disabled")
+                throw UserLocationClient.LocationException("GPS and Network is Disabled")
             }
 
             // create request
