@@ -1,9 +1,11 @@
 package com.example.weathertriggerapp2.repository
 
-import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+/**
+ * Class representing CalorieCount unit tests
+ * */
 class CalorieCountRepoTest {
 
     @Test

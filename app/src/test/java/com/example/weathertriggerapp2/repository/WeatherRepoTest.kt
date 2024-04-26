@@ -17,6 +17,9 @@ import org.mockito.Mockito.`when`
 import retrofit2.Call
 import retrofit2.Response
 
+/**
+ * Class representing WeatherRepository unit tests
+ * */
 class WeatherRepoTest {
     private lateinit var weatherRepo: WeatherRepository
     private lateinit var mockWeatherApi: OpenWeatherApiService

@@ -20,7 +20,7 @@ import java.util.Calendar
  * */
 class WeatherNotification(val context: Context) {
     /**
-     * Function for scheduling notification at 9am if the user's device battery charge is over 20%
+     * Function for scheduling notification at 9am if the user's device battery charge is over 20% daily
      * */
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleWeatherNotification() {

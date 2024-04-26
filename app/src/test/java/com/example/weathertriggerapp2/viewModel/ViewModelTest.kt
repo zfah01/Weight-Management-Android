@@ -3,32 +3,35 @@ package com.example.weathertriggerapp2.viewModel
 
 import android.content.Context
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 
-class ViewModelTests() {
+/**
+ * Class representing Calorie View Model Unit Tests
+ * */
+class ViewModelTests {
+    @ExperimentalCoroutinesApi
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Mock
-    val viewModel = CalorieViewModel(mock(Context::class.java))
+    private lateinit var viewModel: CalorieViewModel
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @BeforeEach
-    fun setUp() {
-        // Set the main dispatcher for testing
-        Dispatchers.setMain(Dispatchers.Default)
+
+    @Before
+    fun setUp(){
+        viewModel = CalorieViewModel(mock(Context::class.java))
     }
-
 
     // test user input with invalid food
     @Test
-    fun testFoodNotString(){
+    fun testFoodNotString() {
         var originalCalories = viewModel.totalCalories
         var originalFats = viewModel.totalSaturatedFat
         var originalSugar = viewModel.totalSugar
@@ -108,8 +111,10 @@ class ViewModelTests() {
     }
 
     //test reset all
+
+    @ExperimentalCoroutinesApi
     @Test
-    fun testResetModel(){
+    fun testResetModel() = run {
         viewModel.resetViewModel()
 
         assertEquals(0.0, CalorieCountRepository.calorieCount)

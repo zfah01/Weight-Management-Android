@@ -18,7 +18,7 @@ import java.util.Calendar
 class InsertTotalCalories(val context: Context) {
 
     /**
-     * Function for scheduling database insertion at 11.59pm
+     * Function for scheduling database insertion at 11.59pm daily
      * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")

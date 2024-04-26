@@ -14,6 +14,10 @@ import kotlin.test.assertNotNull
 
 // https://stackoverflow.com/questions/16243580/mockito-how-to-mock-and-assert-a-thrown-exception
 // https://github.com/lykmapipo/android-location-provider/blob/master/library/src/test/java/com/github/lykmapipo/location/LocationProviderTest.java
+
+/**
+ * Class representing UserLocationClient unit tests
+ * */
 @RunWith(MockitoJUnitRunner::class)
 class LocationClientTest {
     @Mock

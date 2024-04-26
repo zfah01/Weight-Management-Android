@@ -2,7 +2,6 @@ package com.example.weathertriggerapp2.repository
 
 import com.example.weathertriggerapp2.data.Calorie
 import com.example.weathertriggerapp2.data.CalorieDao
-import com.example.weathertriggerapp2.repository.OfflineCaloriesRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -10,6 +9,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+/**
+ * Class representing OfflineCaloriesRepository unit tests
+ * */
 class OfflineRepoTest {
 
     @Mock

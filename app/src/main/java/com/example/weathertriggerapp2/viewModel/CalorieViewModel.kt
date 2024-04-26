@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.weathertriggerapp2.network.NutritionApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 /**
  * Class representing CalorieViewModel
@@ -20,42 +22,39 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
     var totalSugar = 0.0
     var totalSaturatedFat = 0.0
 
-//    /**
-//     * Upon initialization, check to see if current time is midnight
-//     * */
-//    init {
-//        viewModelScope.launch {
-//            resetViewModelVariables()
-//        }
-//    }
-//
-//    /**
-//     * Function to check if current time is midnight. If so, reset all variables to zero
-//     * */
-//    private suspend fun resetViewModelVariables() {
-//        while (true) {
-//            val cal = Calendar.getInstance()
-//            cal.timeInMillis = System.currentTimeMillis()
-//            cal.set(Calendar.HOUR_OF_DAY, 0)
-//            cal.set(Calendar.MINUTE, 0)
-//            cal.set(Calendar.SECOND, 0)
-//            cal.set(Calendar.MILLISECOND, 0)
-//            val timeAtCurrent = System.currentTimeMillis()
-//            val timeAtMidnight = cal.timeInMillis
-//            var time = timeAtMidnight - timeAtCurrent
-//            if (time < 0) {
-//                cal.add(Calendar.DAY_OF_MONTH, 1)
-//                time = cal.timeInMillis - timeAtCurrent
-//            }
-//            Log.i(TAG, "resetting variables delayed until midnight")
-//
-//            delay(time)
-//
-//            Log.i(TAG, "currently midnight time to reset variables")
-//
-//            resetViewModel()
-//        }
-//    }
+    /**
+     * Upon initialization, check to see if current time is midnight
+     * */
+    init {
+        viewModelScope.launch {
+            resetViewModelVariables()
+        }
+    }
+
+    /**
+     * Function to check if current time is midnight. If so, reset all variables to zero
+     * */
+    private suspend fun resetViewModelVariables() {
+        while (true) {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = System.currentTimeMillis()
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val timeAtCurrent = System.currentTimeMillis()
+            val timeAtMidnight = cal.timeInMillis
+            var time = timeAtMidnight - timeAtCurrent
+            if (time < 0) {
+                cal.add(Calendar.DAY_OF_MONTH, 1)
+                time = cal.timeInMillis - timeAtCurrent
+            }
+
+            delay(time)
+
+            resetViewModel()
+        }
+    }
 
 
     /**

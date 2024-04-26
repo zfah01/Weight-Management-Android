@@ -15,6 +15,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Class representing Notification unit tests
+ * */
 class BroadcastReceiverTest {
 
     @Test

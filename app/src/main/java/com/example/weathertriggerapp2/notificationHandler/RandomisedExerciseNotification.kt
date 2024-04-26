@@ -15,7 +15,7 @@ import java.util.Calendar
  * */
 class RandomisedExerciseNotification(val context: Context) {
     /**
-     * Function for scheduling notification at 9am
+     * Function for scheduling notification at 9am daily
      * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")

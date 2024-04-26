@@ -12,6 +12,9 @@ import org.mockito.Mockito.`when`
 import retrofit2.Call
 import retrofit2.Response
 
+/**
+ * Class representing NutritionRepository unit tests
+ * */
 class NutritionRepoTest {
     private lateinit var nutritionRepo: NutritionRepository
     private lateinit var nutritionMockApi: NutritionApiService

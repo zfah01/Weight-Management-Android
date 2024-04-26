@@ -3,7 +3,6 @@ package com.example.weathertriggerapp2.repository
 
 import com.example.weathertriggerapp2.data.Calorie
 import com.example.weathertriggerapp2.data.CalorieDao
-import com.example.weathertriggerapp2.repository.CalorieRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -13,6 +12,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
+/**
+ * Class representing CalorieRepository unit tests
+ * */
 class CalorieRepoTest {
 
     @Mock

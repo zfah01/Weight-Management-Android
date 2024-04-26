@@ -4,6 +4,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Class representing NotificationMessages unit tests
+ * */
 class NotificationMessagesTests {
     @Test
     fun calorieEndOfDayMessageCaloriesNotRecorded() {

@@ -1,12 +1,13 @@
 package com.example.weathertriggerapp2.util
 
-import com.example.weathertriggerapp2.util.getCurrWeek
-import com.example.weathertriggerapp2.util.roundOffDecimal
 import org.junit.Test
 import java.util.Calendar
 import kotlin.test.assertEquals
 
 
+/**
+ * Class representing Constants unit tests
+ * */
 class ConstantsTests {
     @Test
     fun roundDistanceValue() {

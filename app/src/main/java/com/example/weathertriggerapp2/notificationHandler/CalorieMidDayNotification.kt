@@ -18,7 +18,7 @@ import java.util.Calendar
  * */
 class CalorieMidDayNotification(val context: Context) {
     /**
-     * Function for scheduling notification at 3pm
+     * Function for scheduling notification at 3pm daily
      * */
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
