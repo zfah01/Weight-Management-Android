@@ -45,6 +45,10 @@ import kotlin.math.sqrt
 /**
  * Main Activity class for application
  * */
+
+ /**
+ * ref: https://programmerworld.co/android/how-to-create-walking-step-counter-app-using-accelerometer-sensor-and-shared-preference-in-android/
+ * */
 class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensorManager: SensorManager? = null;
 
