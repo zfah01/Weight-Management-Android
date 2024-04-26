@@ -18,8 +18,10 @@ import com.example.weathertriggerapp2.network.NutritionApi
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import com.example.weathertriggerapp2.repository.CalorieRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 
 class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
@@ -30,6 +32,38 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
 
     var foodUiState by mutableStateOf<List<NutritionResponse>?>(null)
         private set
+
+    init {
+        viewModelScope.launch {
+            resetViewModelVariables()
+        }
+    }
+
+    private suspend fun resetViewModelVariables() {
+        while (true) {
+           
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = System.currentTimeMillis()
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val timeAtCurrent = System.currentTimeMillis()
+            val timeAtMidnight = cal.timeInMillis
+            var time = timeAtMidnight - timeAtCurrent
+            if (time < 0) {
+                cal.add(Calendar.DAY_OF_MONTH, 1)
+                time = cal.timeInMillis - timeAtCurrent
+            }
+            Log.i(TAG, "resetting variables delayed until midnight")
+
+            delay(time)
+
+            Log.i(TAG, "currently midnight time to reset variables")
+
+            resetViewModel()
+        }
+    }
 
     private fun setCalorieCount(newValue: Double) {
         CalorieCountRepository.calorieCount = newValue
