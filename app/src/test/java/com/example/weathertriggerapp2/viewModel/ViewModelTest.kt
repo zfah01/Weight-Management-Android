@@ -3,9 +3,13 @@ package com.example.weathertriggerapp2.viewModel
 
 import android.content.Context
 import com.example.weathertriggerapp2.repository.CalorieCountRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 
@@ -14,23 +18,13 @@ class ViewModelTests() {
     @Mock
     val viewModel = CalorieViewModel(mock(Context::class.java))
 
-//    fun getJsonValue(context: Context){
-//       var jsonObject: JSONObject = {}
-//       jsonObject.put("name", "banana")
-//
-//
-//    }
-
-    // test calorie count repo matches mock api response
-    // test there's a response
-    // test user input with food and portion
-    @Test
-    fun testResponse(){
-//        viewModel.getCalorieInfo("banana", "100")
-
-//        Mockito.`when`(calorieMockDao.getCaloriesCountWeekly(1)).thenReturn(apiResponseMock)
-
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @BeforeEach
+    fun setUp() {
+        // Set the main dispatcher for testing
+        Dispatchers.setMain(Dispatchers.Default)
     }
+
 
     // test user input with invalid food
     @Test
