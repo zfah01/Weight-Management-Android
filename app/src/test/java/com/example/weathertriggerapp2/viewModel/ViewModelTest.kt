@@ -12,6 +12,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 
+
+//https://stackoverflow.com/questions/48116753/how-to-use-kotlin-to-find-whether-a-string-is-numeric
 /**
  * Class representing Calorie View Model Unit Tests
  * */

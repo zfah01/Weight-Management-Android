@@ -1,4 +1,9 @@
 <resources>
     <dimen name="spacer">5dp</dimen>
     <dimen name="spacer_add">16dp</dimen>
+    <dimen name="buttons_width">300dp</dimen>
+    <dimen name="ten_padding">10dp</dimen>
+    <dimen name="thirty_padding">30dp</dimen>
+    <dimen name="twohundred_padding">200dp</dimen>
+    <dimen name="five_padding">5dp</dimen>
 </resources>

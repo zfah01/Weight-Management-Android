@@ -1,20 +1,29 @@
+
+
 package com.example.weathertriggerapp2.viewModel
 
 import android.content.Context
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,16 +34,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weathertriggerapp2.AppViewModelProvider
 import com.example.weathertriggerapp2.R
 import com.example.weathertriggerapp2.data.UserDataStore
+import com.example.weathertriggerapp2.repository.CalorieCountRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Timer
+import kotlin.concurrent.schedule
 import kotlin.reflect.KFunction2
 
-
+//https://www.tutorialspoint.com/how-to-call-a-function-after-a-delay-in-kotlin
+//https://www.geeksforgeeks.org/radiobuttons-in-android-using-jetpack-compose/
 /**
  * Composable functional representing MainScreen
  * */
@@ -46,7 +60,6 @@ fun MainScreen(
 ) {
     InputScreen(calorieViewModel :: getCalorieInfo, modifier, applicationContext)
 }
-
 /**
  * Composable functional representing InputScreen
  * */
@@ -62,7 +75,6 @@ fun InputScreen(
     var errorMessage by rememberSaveable { mutableStateOf(false) }
     var isSQLPresentItem by rememberSaveable { mutableStateOf(false) }
     var isSQLPresentSize by rememberSaveable { mutableStateOf(false) }
-
     val radioOptions = listOf("Male", "Female")
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
 
@@ -103,6 +115,26 @@ fun InputScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
+        var progress by remember { mutableFloatStateOf(0.0f) }
+        val animatedProgress by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec, label = ""
+        )
+        CircularProgressIndicator(
+            progress = animatedProgress,
+            color = if(progress<=1){Color.Green} else {Color.Red},
+            modifier = Modifier
+                .size(dimensionResource(R.dimen.twohundred_padding))
+                .padding(top = dimensionResource(R.dimen.ten_padding)),
+            strokeWidth = dimensionResource(R.dimen.thirty_padding)
+        )
+        Text(
+            text = stringResource(R.string.totalCaloriesSoFar,
+                CalorieCountRepository.calorieCount?.toInt() ?: 0
+            ),
+            fontSize = 30.sp,
+            modifier = Modifier.padding(top = dimensionResource(R.dimen.ten_padding), bottom = dimensionResource(R.dimen.ten_padding))
+        )
         radioOptions.forEach { text ->
             Row(
                 Modifier
@@ -110,6 +142,7 @@ fun InputScreen(
                         selected = (text == selectedOption),
                         onClick = { onOptionSelected(text) }
                     )
+                    .width(dimensionResource(R.dimen.buttons_width))
             ) {
                 RadioButton(
                     selected = (text == selectedOption),
@@ -134,11 +167,7 @@ fun InputScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             ),
-            label = {
-                Text(
-                    text = stringResource(id = R.string.food_item),
-                    color = Color.Black
-                ) },
+            label = { Text(stringResource(R.string.food_item)) },
             isError = isErrorFoodItem,
             supportingText = {
                 if (isErrorFoodItem) {
@@ -154,8 +183,7 @@ fun InputScreen(
                 }
             },
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer)))
-
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.five_padding)))
         OutlinedTextField(
             value = servingSize,
             onValueChange = {
@@ -166,12 +194,7 @@ fun InputScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
-            label = {
-                Text(
-                    text = stringResource(id = R.string.serving_size),
-                    color = Color.Black
-                )
-            },
+            label = { Text(stringResource(R.string.serving_size)) },
             isError = isErrorServingSize,
             supportingText = {
                 if (isErrorServingSize) {
@@ -187,7 +210,6 @@ fun InputScreen(
                 }
             },
         )
-
         Button(
             onClick = {
                 if(!isErrorFoodItem && !isErrorServingSize && foodItem != "" && servingSize != "" && !isSQLPresentItem && !isSQLPresentSize) {
@@ -199,12 +221,12 @@ fun InputScreen(
                 else {
                     errorMessage = true
                 }
+                Timer().schedule(1000){
+                    progress = calcPercentage(selectedOption)
+                }
             }
         ) {
-            Text(
-                text = stringResource(id = R.string.add),
-                color = Color.White
-            )
+            Text(stringResource(R.string.add))
         }
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_add)))
@@ -217,5 +239,17 @@ fun InputScreen(
         }
     }
 }
+
+fun calcPercentage(selectedOption: String): Float {
+    var percentageConsumed = 0.00f
+    percentageConsumed = if(selectedOption == "Male"){
+        (CalorieCountRepository.calorieCount?.div(2000))?.toFloat() ?: 0.00f
+    }
+    else{
+        (CalorieCountRepository.calorieCount?.div(1500))?.toFloat() ?: 0.00f
+    }
+    return percentageConsumed
+}
+
 
 
