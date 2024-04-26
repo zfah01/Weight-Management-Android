@@ -24,26 +24,26 @@ import java.util.Date
 
 class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
 
-    private var totalCalories = 0.0
-    private var totalSugar = 0.0
-    private var totalSaturatedFat = 0.0
+    var totalCalories = 0.0
+    var totalSugar = 0.0
+    var totalSaturatedFat = 0.0
 
     var foodUiState by mutableStateOf<List<NutritionResponse>?>(null)
-        private set
+        set
 
-    private fun setCalorieCount(newValue: Double) {
+    fun setCalorieCount(newValue: Double) {
         CalorieCountRepository.calorieCount = newValue
-        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
+//        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
     }
 
-    private fun setSaturatedFatIntake(newValue: Double) {
+    fun setSaturatedFatIntake(newValue: Double) {
         CalorieCountRepository.saturatedFatCount = newValue
-        Log.i("TAG", "FAT COUNT: " + CalorieCountRepository.saturatedFatCount)
+//        Log.i("TAG", "FAT COUNT: " + CalorieCountRepository.saturatedFatCount)
     }
 
-    private fun setSugarIntake(newValue: Double) {
+    fun setSugarIntake(newValue: Double) {
         CalorieCountRepository.sugarCount = newValue
-        Log.i("TAG", "SUGAR COUNT: " + CalorieCountRepository.sugarCount)
+//        Log.i("TAG", "SUGAR COUNT: " + CalorieCountRepository.sugarCount)
     }
 
     fun resetViewModel() {
@@ -53,8 +53,8 @@ class CalorieViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : 
         setCalorieCount(0.0)
         setSugarIntake(0.0)
         setSaturatedFatIntake(0.0)
-        Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
-        Log.i("TAG", "COUNT: $totalCalories")
+        //Log.i("TAG", "COUNT: " + CalorieCountRepository.calorieCount)
+        //Log.i("TAG", "COUNT: $totalCalories")
     }
 
     fun getCalorieInfo(foodItem: String, servingSize : String) {
